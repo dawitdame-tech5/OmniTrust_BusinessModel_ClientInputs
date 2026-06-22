@@ -216,6 +216,77 @@ input.uc-cb{width:15px;height:15px;accent-color:var(--orange);cursor:pointer}
   .hdr-badges{display:none}
   .tab{padding:10px 12px;font-size:11.5px}
 }
+
+/* Scenario comparison strip */
+#scen-strip{display:flex;gap:10px;margin-bottom:14px}
+.sc-card{flex:1;border-radius:8px;padding:11px 14px}
+.sc-card.cons{background:#EFF6FF;border:1.5px solid #BFDBFE}
+.sc-card.base{background:#E0F0F0;border:1.5px solid #99D4D4}
+.sc-card.opt {background:#FEF0E8;border:1.5px solid #FBC7A4}
+.sc-card .sc-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:1px}
+.sc-card.cons .sc-lbl{color:#2563EB}
+.sc-card.base .sc-lbl{color:#006767}
+.sc-card.opt  .sc-lbl{color:#F26522}
+.sc-card .sc-desc{font-size:8.5px;color:#999;margin-bottom:6px;font-style:italic}
+.sc-card .sc-rev{font-size:16px;font-weight:700;letter-spacing:-.3px;font-family:monospace}
+.sc-card.cons .sc-rev{color:#2563EB}
+.sc-card.base .sc-rev{color:#006767}
+.sc-card.opt  .sc-rev{color:#F26522}
+.sc-card .sc-sub{font-size:9.5px;color:#777;margin-top:3px}
+.sc-card .sc-sub b{font-weight:700}
+.sc-card.cons .sc-sub b{color:#2563EB}
+.sc-card.base .sc-sub b{color:#006767}
+.sc-card.opt  .sc-sub b{color:#F26522}
+
+
+/* Rate matrix layout */
+.rate-matrix{display:flex;gap:12px;flex-wrap:wrap}
+.rate-col{flex:1;min-width:130px;background:#F8F9FC;border:1px solid var(--lt);
+  border-radius:var(--r);padding:10px 12px}
+.rate-col-hdr{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;
+  color:var(--navy);margin-bottom:3px;padding-bottom:5px;border-bottom:2px solid var(--orange)}
+.rate-desc{font-size:9px;color:var(--mid);margin-bottom:8px;font-style:italic;line-height:1.4}
+.rate-row{margin-bottom:7px}
+.rate-row:last-child{margin-bottom:0}
+.rate-row label{display:block;font-size:9.5px;font-weight:700;color:var(--mid);
+  text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px}
+.rate-inp{display:flex;align-items:center;gap:2px}
+.rate-inp .usd{font-size:11px;font-weight:700;color:var(--mid);flex-shrink:0}
+.rate-inp input{width:70px;padding:4px 6px;border:1px solid var(--lt);border-radius:4px;
+  font-size:11px;font-weight:700;color:var(--navy);background:white;font-family:monospace}
+.rate-inp input:focus{outline:none;border-color:var(--navy);
+  box-shadow:0 0 0 2px rgba(27,58,106,.08)}
+.rate-hint{font-size:8.5px;color:var(--mid);margin-top:2px;font-style:italic}
+
+
+/* Rate card base/addon structure */
+.rate-base-row{background:rgba(27,58,106,.04);border-radius:4px;padding:3px 5px;
+  margin-bottom:6px;border-left:3px solid var(--orange)}
+.rate-base-row label{display:flex;align-items:center;gap:5px}
+.always-on{display:inline-block;font-size:8px;font-weight:700;padding:1px 5px;
+  border-radius:3px;background:var(--orange);color:#fff;text-transform:uppercase;
+  letter-spacing:.3px;font-style:normal}
+.rate-total-hint{color:var(--t);font-style:normal !important}
+.rate-total-hint b{font-family:monospace}
+
+
+.pat-iss{background:#FEF3C7;color:#92400E}     /* Issuance — amber */
+.pat-upd{background:#EDE9FE;color:#5B21B6}     /* Update — indigo */
+
+
+/* Editable service tier selects */
+.svc-sel{display:inline-block;font-size:8px;font-weight:700;padding:1px 14px 1px 4px;
+  border-radius:3px;border:1px solid transparent;cursor:pointer;font-family:inherit;
+  appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23888'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 3px center;background-size:6px}
+.svc-sel:hover{border-color:rgba(0,0,0,.2)}
+.svc-sel.svc-e{background-color:#EEF2F8;color:#1B3A6A}
+.svc-sel.svc-c{background-color:#E0F0F0;color:#004040}
+.svc-sel.svc-v{background-color:#EDE9FE;color:#5B21B6}
+.svc-sel.svc-a{background-color:#FEF3C7;color:#92400E}
+.svc-sel.svc-changed{border-color:var(--orange)!important;background-color:var(--o-lt)!important}
+
 </style>
 <script>/* SheetJS v0.18.5 — bundled for offline use */
 /*! xlsx.js (C) 2013-present SheetJS -- http://sheetjs.com */
@@ -263,7 +334,7 @@ for(var p=0,v=0;p!==c.length;++p)if((v=c.charCodeAt(p))===n||v===i||v===34||f.fo
     <span class="hdr-badge pop">17.5M population</span>
     <span class="hdr-badge arch">Gazelle archetype</span>
     <span class="hdr-badge otr">OTR $1.76 / event</span>
-    <span class="hdr-badge spv">25% SPV share</span>
+    
   </div>
   <div class="hdr-actions">
     <button class="hdr-btn" onclick="resetForm()" title="Reset all overrides to suggested values">↺ Reset</button>
@@ -278,6 +349,7 @@ for(var p=0,v=0;p!==c.length;++p)if((v=c.charCodeAt(p))===n||v===i||v===34||f.fo
 <div class="tabbar">
   <button class="tab act" onclick="switchTab(0)">① Unit Prices</button>
   <button class="tab"     onclick="switchTab(1)">② Volume &amp; Projection</button>
+  <button class="tab"     onclick="switchTab(2)">③ Platform Participation</button>
 </div>
 
 <!-- ── Tab 0: Price Table ── -->
@@ -291,37 +363,148 @@ for(var p=0,v=0;p!==c.length;++p)if((v=c.charCodeAt(p))===n||v===i||v===34||f.fo
 
   <!-- Global service rates -->
   <div class="card">
-    <div class="card-title">Service Rate Schedule — Somalia (suggested · editable)</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px">
-      <div class="param-item">
-        <label>eKYC T1 (biometric)</label>
-        <input type="number" id="sr-eT1" value="0.23" step="0.01" min="0" oninput="onGlobalRateChange()">
-        <div class="hint">ABIS + Liveness + E&amp;O</div>
+    <div class="card-title">Service Rate Schedule — Somalia
+      <span style="font-size:9px;font-weight:400;color:var(--mid);margin-left:8px">
+        Total = Base (Always ON) + LoA Add-on · Per-UC price = sum of applicable components
+      </span>
+    </div>
+    <div class="rate-matrix">
+      <!-- eKYC -->
+      <div class="rate-col">
+        <div class="rate-col-hdr">eKYC</div>
+        <div class="rate-desc">Identity verification against biometric register</div>
+        <div class="rate-row rate-base-row">
+          <label>Base <span class="always-on">Always ON</span></label>
+          <div class="rate-inp"><span class="usd">$</span>
+            <input type="number" id="sr-eBase" value="0.10" step="0.01" min="0" oninput="onGlobalRateChange()">
+          </div>
+          <div class="rate-hint">Crypto infra + schema check</div>
+        </div>
+        <div class="rate-row">
+          <label>KL1 Add-on</label>
+          <div class="rate-inp"><span class="usd">$</span>
+            <input type="number" id="sr-eT1-adn" value="0.13" step="0.01" min="0" oninput="onGlobalRateChange()">
+          </div>
+          <div class="rate-hint rate-total-hint">Total: <b id="tot-eT1">$0.23</b> · 1:N biometric + liveness</div>
+        </div>
+        <div class="rate-row">
+          <label>KL2 Add-on</label>
+          <div class="rate-inp"><span class="usd">$</span>
+            <input type="number" id="sr-eT2-adn" value="1.66" step="0.01" min="0" oninput="onGlobalRateChange()">
+          </div>
+          <div class="rate-hint rate-total-hint">Total: <b id="tot-eT2">$1.76</b> · OTR · gov-set + anchor</div>
+        </div>
       </div>
-      <div class="param-item">
-        <label>eKYC T2 (+ anchor)</label>
-        <input type="number" id="sr-eT2" value="1.76" step="0.01" min="0" oninput="onGlobalRateChange()">
-        <div class="hint">Somalia OTR · gov-set</div>
+      <!-- Auth -->
+      <div class="rate-col">
+        <div class="rate-col-hdr">Auth</div>
+        <div class="rate-desc">Proving identity for access to a service</div>
+        <div class="rate-row rate-base-row">
+          <label>Base <span class="always-on">Always ON</span></label>
+          <div class="rate-inp"><span class="usd">$</span>
+            <input type="number" id="sr-aBase" value="0.05" step="0.01" min="0" oninput="onGlobalRateChange()">
+          </div>
+          <div class="rate-hint">Token/QR/push · no biometric</div>
+        </div>
+        <div class="rate-row">
+          <label>AL1 Add-on</label>
+          <div class="rate-inp"><span class="usd">$</span>
+            <input type="number" id="sr-aL1-adn" value="0.03" step="0.01" min="0" oninput="onGlobalRateChange()">
+          </div>
+          <div class="rate-hint rate-total-hint">Total: <b id="tot-aL1">$0.08</b> · face match, no PAD</div>
+        </div>
+        <div class="rate-row">
+          <label>AL2 Add-on</label>
+          <div class="rate-inp"><span class="usd">$</span>
+            <input type="number" id="sr-aL2-adn" value="0.25" step="0.01" min="0" oninput="onGlobalRateChange()">
+          </div>
+          <div class="rate-hint rate-total-hint">Total: <b id="tot-aL2">$0.30</b> · face + ISO 30107 liveness</div>
+        </div>
+        <div class="rate-row">
+          <label>AL3 Add-on</label>
+          <div class="rate-inp"><span class="usd">$</span>
+            <input type="number" id="sr-aL3-adn" value="0.35" step="0.01" min="0" oninput="onGlobalRateChange()">
+          </div>
+          <div class="rate-hint rate-total-hint">Total: <b id="tot-aL3">$0.40</b> · + crypto proof</div>
+        </div>
       </div>
-      <div class="param-item">
-        <label>Auth L1</label>
-        <input type="number" id="sr-aL1" value="0.08" step="0.01" min="0" oninput="onGlobalRateChange()">
-        <div class="hint">Biometric auth, no PAD</div>
+      <!-- CI -->
+      <div class="rate-col">
+        <div class="rate-col-hdr">CI — Credential Issuance</div>
+        <div class="rate-desc">Minting &amp; binding a verifiable credential</div>
+        <div class="rate-row rate-base-row">
+          <label>Base <span class="always-on">Always ON</span></label>
+          <div class="rate-inp"><span class="usd">$</span>
+            <input type="number" id="sr-cBase" value="0.10" step="0.01" min="0" oninput="onGlobalRateChange()">
+          </div>
+          <div class="rate-hint">VC signing + revocation entry</div>
+        </div>
+        <div class="rate-row">
+          <label>IL1 Add-on</label>
+          <div class="rate-inp"><span class="usd">$</span>
+            <input type="number" id="sr-cL1-adn" value="0.13" step="0.01" min="0" oninput="onGlobalRateChange()">
+          </div>
+          <div class="rate-hint rate-total-hint">Total: <b id="tot-cL1">$0.23</b> · biometric binding (face)</div>
+        </div>
+        <div class="rate-row">
+          <label>IL2 Add-on</label>
+          <div class="rate-inp"><span class="usd">$</span>
+            <input type="number" id="sr-cL2-adn" value="0.35" step="0.01" min="0" oninput="onGlobalRateChange()">
+          </div>
+          <div class="rate-hint rate-total-hint">Total: <b id="tot-cL2">$0.45</b> · biometric + ISO liveness</div>
+        </div>
+        <div class="rate-row">
+          <label>IL3 Add-on</label>
+          <div class="rate-inp"><span class="usd">$</span>
+            <input type="number" id="sr-cL3-adn" value="0.40" step="0.01" min="0" oninput="onGlobalRateChange()">
+          </div>
+          <div class="rate-hint rate-total-hint">Total: <b id="tot-cL3">$0.50</b> · biometric + data anchor</div>
+        </div>
       </div>
-      <div class="param-item">
-        <label>CI L1 (Issuance)</label>
-        <input type="number" id="sr-cL1" value="0.23" step="0.01" min="0" oninput="onGlobalRateChange()">
-        <div class="hint">Biometric credential</div>
+      <!-- CV -->
+      <div class="rate-col">
+        <div class="rate-col-hdr">CV — Credential Verification</div>
+        <div class="rate-desc">Checking a presented credential is valid</div>
+        <div class="rate-row rate-base-row">
+          <label>Base <span class="always-on">Always ON</span></label>
+          <div class="rate-inp"><span class="usd">$</span>
+            <input type="number" id="sr-vBase" value="0.10" step="0.01" min="0" oninput="onGlobalRateChange()">
+          </div>
+          <div class="rate-hint">Crypto sig check + status list</div>
+        </div>
+        <div class="rate-row">
+          <label>VL1 Add-on</label>
+          <div class="rate-inp"><span class="usd">$</span>
+            <input type="number" id="sr-vL1-adn" value="0.13" step="0.01" min="0" oninput="onGlobalRateChange()">
+          </div>
+          <div class="rate-hint rate-total-hint">Total: <b id="tot-vL1">$0.23</b> · biometric match (face)</div>
+        </div>
+        <div class="rate-row">
+          <label>VL2 Add-on</label>
+          <div class="rate-inp"><span class="usd">$</span>
+            <input type="number" id="sr-vL2-adn" value="0.35" step="0.01" min="0" oninput="onGlobalRateChange()">
+          </div>
+          <div class="rate-hint rate-total-hint">Total: <b id="tot-vL2">$0.45</b> · biometric + ISO liveness</div>
+        </div>
+        <div class="rate-row">
+          <label>VL3 Add-on</label>
+          <div class="rate-inp"><span class="usd">$</span>
+            <input type="number" id="sr-vL3-adn" value="0.40" step="0.01" min="0" oninput="onGlobalRateChange()">
+          </div>
+          <div class="rate-hint rate-total-hint">Total: <b id="tot-vL3">$0.50</b> · + liveness crypto proof</div>
+        </div>
       </div>
-      <div class="param-item">
-        <label>CV L1 (Verification)</label>
-        <input type="number" id="sr-vL1" value="0.23" step="0.01" min="0" oninput="onGlobalRateChange()">
-        <div class="hint">Biometric verify</div>
-      </div>
-      <div class="param-item">
-        <label>Pay (flat)</label>
-        <input type="number" id="sr-pay" value="0.10" step="0.01" min="0" oninput="onGlobalRateChange()">
-        <div class="hint">Payment rail event</div>
+      <!-- Pay -->
+      <div class="rate-col">
+        <div class="rate-col-hdr">Pay Rail</div>
+        <div class="rate-desc">Payment transaction events</div>
+        <div class="rate-row rate-base-row">
+          <label>Flat <span class="always-on">Always ON</span></label>
+          <div class="rate-inp"><span class="usd">$</span>
+            <input type="number" id="sr-pay" value="0.10" step="0.01" min="0" oninput="onGlobalRateChange()">
+          </div>
+          <div class="rate-hint">Per payment rail event</div>
+        </div>
       </div>
     </div>
   </div>
@@ -367,7 +550,7 @@ for(var p=0,v=0;p!==c.length;++p)if((v=c.charCodeAt(p))===n||v===i||v===34||f.fo
     <b>A</b> = year 1 adoption rate (% of applicable users active in 2027).
     The <b>Adoption Ramp (AR)</b> defines how adoption grows from 2027 to 2036.
     All suggested values reflect Somalia's nascent digital infrastructure context.
-    Revenue = Enrolled Pop × P% × AR[year] × E × Unit Price.
+    Revenue = Enrolled Pop × P% × AR[year] × E × Unit Price. All figures in USD.
   </div>
 
   <!-- Context parameters -->
@@ -399,11 +582,7 @@ for(var p=0,v=0;p!==c.length;++p)if((v=c.charCodeAt(p))===n||v===i||v===34||f.fo
           <input type="number" id="p-enrs" value="8" step="1" min="1" max="10" oninput="recalc()">
           <div class="hint">Years to reach target</div>
         </div>
-        <div class="param-item">
-          <label>TECH5-SA SPV Share %</label>
-          <input type="number" id="p-spv" value="25" step="1" min="1" max="100" oninput="recalc()">
-          <div class="hint">Suggested — confirm per deal terms</div>
-        </div>
+<input type="hidden" id="p-spv" value="25">
       </div>
     </div>
 
@@ -419,6 +598,7 @@ for(var p=0,v=0;p!==c.length;++p)if((v=c.charCodeAt(p))===n||v===i||v===34||f.fo
   </div>
 
   <!-- KPIs -->
+  <div class="kpi-strip" id="scen-strip"></div>
   <div class="kpi-strip" id="kpi-strip"></div>
 
   <!-- Sector filter -->
@@ -492,10 +672,115 @@ for(var p=0,v=0;p!==c.length;++p)if((v=c.charCodeAt(p))===n||v===i||v===34||f.fo
     </div>
   </div>
 
-  <div class="form-footer">
-    OmniTrust DPI · Somalia Partner Data Entry Form · Confidential — not for distribution
-    · Revenue projections are indicative; final contracted rates may vary.
-    TECH5-SA SPV share 25% (suggested — confirm per deal terms). All figures in USD.
+  
+</div>
+
+
+<!-- ── Tab 2: Platform Participation ── -->
+<div id="tab-2" class="tab-panel">
+  <div class="instr">
+    <b>Platform Participation Fees.</b>
+    Annual subscription fees paid by institutions to access the OmniTrust platform.
+    Two categories: <b>Cat A</b> (RP Access — verifiers only) and <b>Cat B</b> (Issuer+Verifier — institutions that also issue credentials).
+    Edit tier fees, assign each institution a tier and start year, and the table auto-projects annual revenue.
+    These are <b>L2 institutional revenues</b> — separate from and additive to transaction (L3) revenues.
+  </div>
+
+  <!-- Fee Schedule -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+    <div class="card">
+      <div class="card-title">Category A — RP Access </div>
+      <table style="width:100%;border-collapse:collapse;font-size:11px">
+        <thead><tr style="background:#F0F2F5">
+          <th style="padding:5px 8px;text-align:left;font-size:9px;font-weight:700;color:var(--mid);text-transform:uppercase">Code</th>
+          <th style="padding:5px 8px;text-align:left;font-size:9px;font-weight:700;color:var(--mid);text-transform:uppercase">Tier</th>
+          <th style="padding:5px 8px;text-align:left;font-size:9px;font-weight:700;color:var(--mid);text-transform:uppercase">Suited For</th>
+          <th style="padding:5px 8px;text-align:right;font-size:9px;font-weight:700;color:var(--mid);text-transform:uppercase">Annual Fee</th>
+        </tr></thead>
+        <tbody id="cat-a-tbl"></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">Category B — Issuer + Verifier </div>
+      <table style="width:100%;border-collapse:collapse;font-size:11px">
+        <thead><tr style="background:#F0F2F5">
+          <th style="padding:5px 8px;text-align:left;font-size:9px;font-weight:700;color:var(--mid);text-transform:uppercase">Code</th>
+          <th style="padding:5px 8px;text-align:left;font-size:9px;font-weight:700;color:var(--mid);text-transform:uppercase">Tier</th>
+          <th style="padding:5px 8px;text-align:left;font-size:9px;font-weight:700;color:var(--mid);text-transform:uppercase">Suited For</th>
+          <th style="padding:5px 8px;text-align:right;font-size:9px;font-weight:700;color:var(--mid);text-transform:uppercase">Annual Fee</th>
+        </tr></thead>
+        <tbody id="cat-b-tbl"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div id="plat-kpis" style="display:flex;gap:10px;margin-bottom:14px"></div>
+
+  <!-- Institution Pipeline -->
+  <div class="tbl-container">
+    <div class="tbl-banner" style="padding:10px 16px;display:flex;align-items:center;justify-content:space-between">
+      <span style="color:#fff;font-size:12px;font-weight:700">Institution Pipeline — Platform Participation 2027–2036</span>
+      <button onclick="addInstitution()" style="font-size:11px;font-weight:700;padding:4px 12px;
+        border:1px solid rgba(255,255,255,.3);border-radius:4px;background:var(--orange);
+        color:#fff;cursor:pointer">+ Add Institution</button>
+    </div>
+    <div style="overflow-x:auto;max-height:440px;overflow-y:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:11px">
+        <thead style="background:#F8F9FC;position:sticky;top:0;z-index:10">
+          <tr>
+            <th style="padding:6px 8px;text-align:left;font-size:9px;font-weight:700;color:var(--mid);text-transform:uppercase;white-space:nowrap">Institution</th>
+            <th style="padding:6px 8px;text-align:left;font-size:9px;font-weight:700;color:var(--mid);text-transform:uppercase">Sector</th>
+            <th style="padding:6px 8px;text-align:center;font-size:9px;font-weight:700;color:var(--mid);text-transform:uppercase">Cat</th>
+            <th style="padding:6px 8px;text-align:center;font-size:9px;font-weight:700;color:var(--mid);text-transform:uppercase">Tier</th>
+            <th style="padding:6px 8px;text-align:center;font-size:9px;font-weight:700;color:var(--mid);text-transform:uppercase">Annual Fee</th>
+            <th style="padding:6px 8px;text-align:center;font-size:9px;font-weight:700;color:var(--mid);text-transform:uppercase">Start</th>
+            <th style="padding:6px 4px;text-align:right;font-size:9px;font-weight:700;color:var(--mid);text-transform:uppercase" title="2027-2036 annual fee when active, — when not yet joined">2027</th>
+            <th style="padding:6px 4px;text-align:right;font-size:9px;font-weight:700;color:var(--mid)">2028</th>
+            <th style="padding:6px 4px;text-align:right;font-size:9px;font-weight:700;color:var(--mid)">2029</th>
+            <th style="padding:6px 4px;text-align:right;font-size:9px;font-weight:700;color:var(--mid)">2030</th>
+            <th style="padding:6px 4px;text-align:right;font-size:9px;font-weight:700;color:var(--mid)">2031</th>
+            <th style="padding:6px 4px;text-align:right;font-size:9px;font-weight:700;color:var(--mid)">2032</th>
+            <th style="padding:6px 4px;text-align:right;font-size:9px;font-weight:700;color:var(--mid)">2033</th>
+            <th style="padding:6px 4px;text-align:right;font-size:9px;font-weight:700;color:var(--mid)">2034</th>
+            <th style="padding:6px 4px;text-align:right;font-size:9px;font-weight:700;color:var(--mid)">2035</th>
+            <th style="padding:6px 4px;text-align:right;font-size:9px;font-weight:700;color:var(--mid)">2036</th>
+            <th style="padding:6px 4px;text-align:right;font-size:9px;font-weight:700;color:var(--mid)">10yr</th>
+            <th style="padding:6px 8px;width:28px"></th>
+          </tr>
+        </thead>
+        <tbody id="inst-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Revenue Summary by Year -->
+  <div class="card" style="margin-top:14px">
+    <div class="card-title">Platform Revenue Summary — 2027–2036</div>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:11px" id="plat-sum-tbl">
+        <thead><tr style="background:#F8F9FC">
+          <th style="padding:6px 10px;text-align:left;font-size:9px;font-weight:700;color:var(--mid);text-transform:uppercase">Metric</th>
+          <th style="padding:6px 6px;text-align:right;font-size:9px;font-weight:700;color:var(--mid)">2027</th>
+          <th style="padding:6px 6px;text-align:right;font-size:9px;font-weight:700;color:var(--mid)">2028</th>
+          <th style="padding:6px 6px;text-align:right;font-size:9px;font-weight:700;color:var(--mid)">2029</th>
+          <th style="padding:6px 6px;text-align:right;font-size:9px;font-weight:700;color:var(--mid)">2030</th>
+          <th style="padding:6px 6px;text-align:right;font-size:9px;font-weight:700;color:var(--mid)">2031</th>
+          <th style="padding:6px 6px;text-align:right;font-size:9px;font-weight:700;color:var(--mid)">2032</th>
+          <th style="padding:6px 6px;text-align:right;font-size:9px;font-weight:700;color:var(--mid)">2033</th>
+          <th style="padding:6px 6px;text-align:right;font-size:9px;font-weight:700;color:var(--mid)">2034</th>
+          <th style="padding:6px 6px;text-align:right;font-size:9px;font-weight:700;color:var(--mid)">2035</th>
+          <th style="padding:6px 6px;text-align:right;font-size:9px;font-weight:700;color:var(--mid)">2036</th>
+          <th style="padding:6px 10px;text-align:right;font-size:9px;font-weight:700;color:var(--navy)">10yr Total</th>
+        </tr></thead>
+        <tbody id="plat-sum-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="form-footer" style="margin-top:12px">
+    OmniTrust DPI · Somalia · Platform Participation Revenue · L2 Institutional Subscriptions
+    · Separate from and additive to L3 Transaction Revenue
   </div>
 </div>
 
@@ -575,17 +860,132 @@ const SEC_E = {
 };
 
 // ── Pattern classifier ────────────────────────────────────────────────────────
-function getPat(svcs){
+
+
+// ── Service tier editing ───────────────────────────────────────────────────────
+const SVC_TIERS = {
+  ekyc: ['T1','T2'],
+  ci:   ['Base','L1','L2','L3'],
+  cv:   ['Base','L1','L2','L3'],
+  auth: ['Base','L1','L2','L3'],
+};
+
+// Get effective service mix for a UC (baseline override applied)
+function getUCSvcs(uc){
+  if(!OV.svcs[uc.id]) return uc.svcs;
+  return Object.assign({}, uc.svcs, OV.svcs[uc.id]);
+}
+
+// Step a tier one level up or down (-1 / +1)
+function stepTier(tier, svcType, dir){
+  const ladder = SVC_TIERS[svcType] || [];
+  const idx = ladder.indexOf(tier);
+  if(idx < 0) return tier;
+  return ladder[Math.max(0, Math.min(ladder.length-1, idx+dir))];
+}
+
+// Derive a modified svcs by stepping CI/CV/Auth tiers dir (-1 conservative, +1 optimistic)
+// eKYC is a service TYPE (T1=basic biometric, T2=anchored) not a quality level — kept fixed
+function deriveSvcs(baseSvcs, dir){
+  const out = {};
+  Object.entries(baseSvcs).forEach(([k,v]) => {
+    out[k] = (k !== 'ekyc' && SVC_TIERS[k] && v) ? stepTier(v, k, dir) : v;
+  });
+  return out;
+}
+
+function onSvcChange(ucId, svcType, newTier){
+  const uc = UC.find(u=>u.id===ucId); if(!uc) return;
+  // Store override only if different from default
+  if(uc.svcs[svcType] === newTier || (newTier==='Base' && !uc.svcs[svcType])){
+    if(OV.svcs[ucId]){ delete OV.svcs[ucId][svcType];
+      if(!Object.keys(OV.svcs[ucId]).length) delete OV.svcs[ucId]; }
+  } else {
+    if(!OV.svcs[ucId]) OV.svcs[ucId] = {};
+    OV.svcs[ucId][svcType] = newTier;
+  }
+  // Clear manual price override — suggested price should recompute from new tier
+  delete OV.prices[ucId];
+  markUnsaved();
+  // Update just this row's suggested price + price input + pattern in-place
+  const rates = getRates();
+  const effSvcs = getUCSvcs(uc);
+  const newSug = sugPrice(effSvcs, rates);
+  const sugEl = document.getElementById('sug-'+ucId);
+  if(sugEl) sugEl.textContent = '$'+newSug.toFixed(3);
+  const inp = document.querySelector(`input[data-id="${ucId}"]`);
+  if(inp && !inp.classList.contains('overridden')){
+    inp.value = newSug.toFixed(3);
+    inp.dataset.sug = newSug;
+  }
+  // Mark changed badge
+  document.querySelectorAll(`.svc-sel[data-id="${ucId}"][data-svc="${svcType}"]`).forEach(sel=>{
+    sel.classList.toggle('svc-changed', OV.svcs[ucId]?.[svcType] !== undefined);
+  });
+  // Update volume revenue cells + scenario strip
+  updateRevCellsOnly();
+}
+
+// Per-UC pattern overrides — for cases where service-flag logic gives the wrong label
+const UC_PAT_OVERRIDE = {
+  // Civil registrations: CI + Auth but these are FIRST-TIME records, not renewals
+  'UC-02-002': 'iss',  // Birth — Certificate issuance
+  'UC-02-003': 'iss',  // Birth — Late registration
+  'UC-02-005': 'iss',  // Marriage — Registration & solemnization
+  'UC-02-007': 'iss',  // Death — Registration
+  'UC-02-008': 'iss',  // Death — Certificate issuance
+  // New first-time licences/credentials (not renewals of existing)
+  'UC-07-011': 'iss',  // Health facility — Licensing (new licence)
+  'UC-15-013': 'iss',  // Certificate of origin — Issuance
+  'UC-23-005': 'iss',  // Agricultural extension — Farmer enrollment
+  'UC-23-007': 'iss',  // Livestock identification — Tag issuance
+  'UC-30-004': 'iss',  // Private membership pass (new membership)
+  // Attribute update — modifying existing record, not a full renewal
+  'UC-01-002': 'upd',  // National Digital ID — Update identity attributes
+};
+
+function getPat(svcs, ucId){
+  // Check per-UC override first
+  if(ucId && UC_PAT_OVERRIDE[ucId]) return UC_PAT_OVERRIDE[ucId];
   const e=!!svcs.ekyc,c=!!svcs.ci,v=!!svcs.cv,a=!!svcs.auth;
-  if(e&&c)return'onb';if(e&&!c)return'id';
-  if(a&&!e&&!c&&!v)return'auth';if(v&&a&&!e&&!c)return'ver';
-  if(c&&a&&!e&&!v)return'ren';if(c&&v&&a)return'lif';
+  if(e&&c)      return'onb';  // eKYC + CI → Onboarding
+  if(e&&!c&&v)  return'ver';  // eKYC + CV (+Auth) → Verification (biometric credential check)
+  if(e&&!c)     return'id';   // eKYC, no CI, no CV → ID check
+  if(a&&!e&&!c&&!v) return'auth'; // Auth only
+  if(v&&a&&!e&&!c)  return'ver';  // CV + Auth → Verification
+  if(c&&a&&!e&&!v)  return'ren';  // CI + Auth → Renewal (genuine re-issue)
+  if(c&&v&&a)       return'lif';  // CI + CV + Auth → Lifecycle
   return'other';
 }
-const PAT_LABEL={'onb':'Onboarding','id':'ID check','auth':'Auth only',
-  'ver':'Verification','ren':'Renewal','lif':'Lifecycle','other':'Other'};
-const PAT_CLS={'onb':'pat-onb','id':'pat-id','auth':'pat-auth',
-  'ver':'pat-ver','ren':'pat-ren','lif':'pat-lif','other':'pat-onb'};
+const PAT_LABEL={
+  'onb':  'Onboarding',  // eKYC + CI
+  'id':   'ID check',    // eKYC only (no CI)
+  'auth': 'Auth only',   // Auth, no biometric issuance
+  'ver':  'Verification',// CV + Auth (or eKYC + CV + Auth)
+  'ren':  'Renewal',     // CI + Auth — re-issue existing credential
+  'lif':  'Lifecycle',   // CI + CV + Auth — verify + re-issue
+  'iss':  'Issuance',    // CI + Auth — first-time new credential/record
+  'upd':  'Update',      // CI + Auth — attribute change on existing credential
+  'other':'Other'
+};
+
+
+const PAT_TITLE={
+  'onb':  'Onboarding — eKYC identity verification + credential issuance. First-time enrolment.',
+  'id':   'ID check — identity verified against biometric register. No credential issued.',
+  'auth': 'Auth only — credential holder authenticates to access a service. No issuance.',
+  'ver':  'Verification — existing credential is presented and verified. Includes eKYC+CV+Auth cases.',
+  'ren':  'Renewal — existing credential re-issued/refreshed. Holder authenticates; no fresh ID verify needed.',
+  'lif':  'Lifecycle — old credential verified, then new credential issued. Full renewal cycle.',
+  'iss':  'Issuance — first-time new credential or record created. Not a renewal of an existing credential.',
+  'upd':  'Update — attribute change on an existing credential. Holder authenticates; credential re-issued.',
+  'other':'Other service composition.',
+};
+const PAT_CLS={
+  'onb':'pat-onb','id':'pat-id','auth':'pat-auth',
+  'ver':'pat-ver','ren':'pat-ren','lif':'pat-lif',
+  'iss':'pat-iss','upd':'pat-upd','other':'pat-onb'
+};
 
 // ── Suggested values ─────────────────────────────────────────────────────────
 function sugP(uc){return SEC_P[uc.s]||0.04;}
@@ -599,17 +999,28 @@ function sugE(uc){
 function sugA(uc){return SOM_AR_DEF[0];}  // default A = AR[0]
 
 function sugPrice(svcs, rates){
+  // Pick rate for each service based on its LoA tier flag in svcs
+  const rateFor=(svc,type)=>{
+    const tier=svcs[type]||'';
+    if(type==='ekyc') return tier==='T2'?rates.eT2:rates.eT1;
+    const map={
+      ci: {Base:rates.cBase,L0:rates.cBase,L1:rates.cL1,L2:rates.cL2,L3:rates.cL3},
+      cv: {Base:rates.vBase,L0:rates.vBase,L1:rates.vL1,L2:rates.vL2,L3:rates.vL3},
+      auth:{Base:rates.aBase,L0:rates.aBase,L1:rates.aL1,L2:rates.aL2,L3:rates.aL3},
+    };
+    return (map[type]||{})[tier] ?? rates[type+'L1'] ?? 0;
+  };
   let p=0;
-  if(svcs.ekyc) p+=rates.eT1;   // Somalia uses T1 for now
-  if(svcs.ci)   p+=svcs.ci==='L0'?rates.cL0:rates.cL1;
-  if(svcs.cv)   p+=svcs.cv==='L0'?rates.cL0:rates.vL1;
-  if(svcs.auth) p+=svcs.auth==='L0'?rates.aL0:rates.aL1;
+  if(svcs.ekyc) p+=rateFor(svcs,'ekyc');
+  if(svcs.ci)   p+=rateFor(svcs,'ci');
+  if(svcs.cv)   p+=rateFor(svcs,'cv');
+  if(svcs.auth) p+=rateFor(svcs,'auth');
   if(svcs.pay)  p+=rates.pay;
   return+p.toFixed(3);
 }
 
 // ── User overrides store ──────────────────────────────────────────────────────
-let OV = {prices:{}, P:{}, E:{}, A:{}, AR:[...SOM_AR_DEF], enabled:{}};
+let OV = {prices:{}, P:{}, E:{}, A:{}, AR:[...SOM_AR_DEF], enabled:{}, svcs:{}};
 let currentSecFilter = null;
 let unsaved = false;
 
@@ -642,9 +1053,32 @@ function updateUnsavedDot(){
 
 // ── Rates ─────────────────────────────────────────────────────────────────────
 function getRates(){
-  const g=id=>+document.getElementById(id)?.value||0;
-  return{eT1:g('sr-eT1'),eT2:g('sr-eT2'),aL0:g('sr-pay')/2,aL1:g('sr-aL1'),
-    cL0:0.10,cL1:g('sr-cL1'),vL0:0.10,vL1:g('sr-vL1'),pay:g('sr-pay')};
+  const DEFS={'sr-eBase':0.10,'sr-eT1-adn':0.13,'sr-eT2-adn':1.66,
+    'sr-aBase':0.05,'sr-aL1-adn':0.03,'sr-aL2-adn':0.25,'sr-aL3-adn':0.35,
+    'sr-cBase':0.10,'sr-cL1-adn':0.13,'sr-cL2-adn':0.35,'sr-cL3-adn':0.40,
+    'sr-vBase':0.10,'sr-vL1-adn':0.13,'sr-vL2-adn':0.35,'sr-vL3-adn':0.40,
+    'sr-pay':0.10};
+  const g=id=>{const el=document.getElementById(id);
+    if(!el)return DEFS[id]||0;const v=parseFloat(el.value);return isNaN(v)?DEFS[id]||0:v;};
+  const eB=g('sr-eBase'),aB=g('sr-aBase'),cB=g('sr-cBase'),vB=g('sr-vBase');
+  const r={
+    eBase:eB, aBase:aB, cBase:cB, vBase:vB,
+    // totals for each tier = base + addon
+    eT1:+(eB+g('sr-eT1-adn')).toFixed(3), eT2:+(eB+g('sr-eT2-adn')).toFixed(3),
+    aL1:+(aB+g('sr-aL1-adn')).toFixed(3), aL2:+(aB+g('sr-aL2-adn')).toFixed(3), aL3:+(aB+g('sr-aL3-adn')).toFixed(3),
+    cL1:+(cB+g('sr-cL1-adn')).toFixed(3), cL2:+(cB+g('sr-cL2-adn')).toFixed(3), cL3:+(cB+g('sr-cL3-adn')).toFixed(3),
+    vL1:+(vB+g('sr-vL1-adn')).toFixed(3), vL2:+(vB+g('sr-vL2-adn')).toFixed(3), vL3:+(vB+g('sr-vL3-adn')).toFixed(3),
+    pay:g('sr-pay'),
+  };
+  r.aL0=aB; r.cL0=cB; r.vL0=vB; // L0 = base only, no addon
+  r.eBase=eB; // expose raw base
+  // Update total display hints
+  const upd=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent='$'+v.toFixed(2);};
+  upd('tot-eT1',r.eT1);upd('tot-eT2',r.eT2);
+  upd('tot-aL1',r.aL1);upd('tot-aL2',r.aL2);upd('tot-aL3',r.aL3);
+  upd('tot-cL1',r.cL1);upd('tot-cL2',r.cL2);upd('tot-cL3',r.cL3);
+  upd('tot-vL1',r.vL1);upd('tot-vL2',r.vL2);upd('tot-vL3',r.vL3);
+  return r;
 }
 
 // ── Sector list ───────────────────────────────────────────────────────────────
@@ -711,13 +1145,19 @@ function renderPriceTbl(){
       <td colspan="7">${u.s}<span class="sec-count">${secEnabled}/${secTotal} included</span></td></tr>`;
       lastSec=u.s;
     }
-    const pat=getPat(u.svcs);
-    const svcBadges=Object.entries(u.svcs).filter(([k,v])=>v).map(([k,v])=>{
+    const effSvcs=getUCSvcs(u);
+    const pat=getPat(effSvcs, u.id);
+    const svcBadges=Object.entries(effSvcs).filter(([k,v])=>v).map(([k,v])=>{
       const cls=k==='ekyc'?'svc-e':k==='ci'?'svc-c':k==='cv'?'svc-v':k==='auth'?'svc-a':'svc-p';
-      const lbl=k==='ekyc'?'eKYC '+v:k==='ci'?'CI '+v:k==='cv'?'CV '+v:k==='auth'?'Auth '+v:'Pay';
-      return`<span class="svc ${cls}">${lbl}</span>`;
+      if(k==='pay') return`<span class="svc ${cls}">Pay</span>`;
+      const tiers=SVC_TIERS[k]||[];
+      const isChanged=OV.svcs[u.id]?.[k]!==undefined;
+      const opts=tiers.map(t=>`<option value="${t}" ${t===v?'selected':''}>${k==='ekyc'?'eKYC ':''}${t}</option>`).join('');
+      return`<select class="svc-sel ${cls}${isChanged?' svc-changed':''}"
+        data-id="${u.id}" data-svc="${k}" title="Change ${k.toUpperCase()} tier"
+        onchange="onSvcChange('${u.id}','${k}',this.value)">${opts}</select>`;
     }).join(' ');
-    const sug=sugPrice(u.svcs,rates);
+    const sug=sugPrice(effSvcs,rates);
     const ov=OV.prices[u.id];
     const val=ov!==undefined?ov:sug;
     const isOv=ov!==undefined;
@@ -727,9 +1167,9 @@ function renderPriceTbl(){
         onchange="toggleEnabled('${u.id}',this.checked)" title="${enabled?'Exclude from model':'Include in model'}"></td>
       <td class="nav">${u.id}</td>
       <td>${u.n}</td>
-      <td><span class="pat ${PAT_CLS[pat]}">${PAT_LABEL[pat]}</span></td>
+      <td><span class="pat ${PAT_CLS[pat]}" title="${PAT_TITLE[pat]||''}">${PAT_LABEL[pat]}</span></td>
       <td>${svcBadges}</td>
-      <td class="r" style="color:var(--mid);font-style:italic">$${sug.toFixed(3)}</td>
+      <td class="r" style="color:var(--mid);font-style:italic" id="sug-${u.id}">$${sug.toFixed(3)}</td>
       <td class="r"><div class="cell-edit">
         <span class="usd">$</span>
         <input type="number" value="${val.toFixed(3)}" step="0.001" min="0"
@@ -782,7 +1222,8 @@ function projectUC(uc,params,rates){
   const P_val=getOv(OV.P,uc.id,sugP(uc));
   const E_val=getOv(OV.E,uc.id,sugE(uc));
   const ar=getAR();
-  const sug=sugPrice(uc.svcs,rates);
+  const effSvcs=getUCSvcs(uc);
+  const sug=sugPrice(effSvcs,rates);
   const price=OV.prices[uc.id]!==undefined?OV.prices[uc.id]:sug;
   const rows=YEARS.map((yr,t)=>{
     const enr=enrollment(t,params);
@@ -804,6 +1245,7 @@ function recalc(){
   renderVolTbl(proj);
   renderProjSummary(projActive,params);
   renderKPIs(projActive,params);
+  renderScenStrip();
 }
 
 function renderVolTbl(proj){
@@ -824,7 +1266,7 @@ function renderVolTbl(proj){
       </td><td colspan="17">${uc.s}<span class="sec-count">${sEn}/${cnt} · 10yr: ${fM(secRev)}</span></td></tr>`;
       lastSec=uc.s;
     }
-    const pat=getPat(uc.svcs);
+    const effSvcsV=getUCSvcs(uc);const pat=getPat(effSvcsV, uc.id);
     const P_sug=sugP(uc),E_sug=sugE(uc);
     const P_val=getOv(OV.P,uc.id,P_sug),E_val=getOv(OV.E,uc.id,E_sug);
     const P_ov=OV.P[uc.id]!==undefined,E_ov=OV.E[uc.id]!==undefined;
@@ -836,7 +1278,7 @@ function renderVolTbl(proj){
         onchange="toggleEnabled('${uc.id}',this.checked)"></td>
       <td class="nav">${uc.id}</td>
       <td title="${uc.n}">${uc.n.length>32?uc.n.slice(0,31)+'…':uc.n}</td>
-      <td><span class="pat ${PAT_CLS[pat]}">${PAT_LABEL[pat]}</span></td>
+      <td><span class="pat ${PAT_CLS[pat]}" title="${PAT_TITLE[pat]||''}">${PAT_LABEL[pat]}</span></td>
       <td class="c"><div class="cell-edit" style="justify-content:center">
         <input type="number" value="${(P_val*100).toFixed(1)}" step="0.5" min="0" max="100"
           data-id="${uc.id}" data-sug="${(P_sug*100).toFixed(1)}" data-field="P"
@@ -899,6 +1341,7 @@ function updateRevCellsOnly(){
   const projActive=proj.filter(p=>isEnabled(p.uc.id));
   renderProjSummary(projActive,params);
   renderKPIs(projActive,params);
+  renderScenStrip();
 }
 
 function renderProjSummary(proj,params){
@@ -922,8 +1365,7 @@ function renderProjSummary(proj,params){
   tbody.innerHTML=
     row('Enrolled Population',enrPop,fN)+
     row('Total Events',totEvents,fN)+
-    row('OT Revenue (gov-collected)',totRev,fM,'tot-row')+
-    row(`TECH5-SA ${Math.round(spv*100)}% SPV`,t5Rev,fM,'t5-row');
+    row('OT Revenue (gov-collected)',totRev,fM,'tot-row')
 }
 
 function renderKPIs(proj,params){
@@ -940,7 +1382,7 @@ function renderKPIs(proj,params){
   const kpis=[
     {lbl:'10-Year OT Revenue',val:fM(rev10),sub:'gov-collected · USD','cls':'orange'},
     {lbl:'5-Year OT Revenue', val:fM(rev5), sub:'gov-collected · USD','cls':''},
-    {lbl:`10-Year T5 ${Math.round(spv*100)}% Revenue`,val:fM(rev10*spv),sub:`TECH5-SA ${Math.round(spv*100)}% · USD`,'cls':'teal'},
+    // T5 revenue KPI removed from client view
     {lbl:'10-Year Event Volume',val:fN(vol10),sub:'cumulative events','cls':''},
     {lbl:'Year 10 Enrolled',  val:fN(enr10), sub:'active enrolled users','cls':''},
     {lbl:'Volume CAGR',       val:cagr.toFixed(1)+'%',sub:'Y1 → Y10','cls':'orange'},
@@ -979,6 +1421,7 @@ function switchTab(n){
   document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('act',i===n));
   document.querySelectorAll('.tab-panel').forEach((p,i)=>p.classList.toggle('act',i===n));
   if(n===1)recalc();
+  if(n===2)initPlatformTab();
 }
 
 
@@ -1007,175 +1450,163 @@ function updateCounts(){
 // ── XLSX multi-sheet export ───────────────────────────────────────────────────
 function exportXLSX(){
   if(typeof XLSX==='undefined'){
-    alert('SheetJS not loaded. Please check your internet connection or use CSV export.');
+    alert('SheetJS not loaded — please open this file in your browser (internet required for XLSX export), or use ↓ CSV.');
     return;
   }
   const params=getParams(), rates=getRates();
-  const proj=UC.map(u=>projectUC(u,params,rates));
-  const spv=params.spv;
+  const pop=params.pop, spv=params.spv;
   const wb=XLSX.utils.book_new();
-  const yrs=[2027,2028,2029,2030,2031,2032,2033,2034,2035,2036];
+  const YEARS=[2027,2028,2029,2030,2031,2032,2033,2034,2035,2036];
+  const SCENS=['conservative','baseline','optimistic'];
+  const SCEN_LABELS={conservative:'Conservative (L0)',baseline:'Baseline (L1)',optimistic:'Optimistic (L2)'};
 
-  // ── Sheet 1: SOM_Meta ──────────────────────────────────────────────────────
-  const metaRows=[
-    ['OmniTrust DPI — Somalia Partner Input','',''],
-    ['Generated','new Date().toISOString().slice(0,10)',''],
-    ['','',''],
+  // Helper: format number as aoa value
+  const n4=v=>+v.toFixed(4);
+  const n5=v=>+v.toFixed(5);
+
+  // ── Sheet 1: Country_Meta ────────────────────────────────────────────────
+  const metaAoa=[
+    ['OmniTrust DPI — Somalia Partner Input'],
+    ['Generated',new Date().toISOString().slice(0,10)],
+    [''],
     ['PARAMETER','VALUE','NOTES'],
     ['Country','Somalia',''],
     ['Country Code','SOM',''],
-    ['Scenario','3 — Baseline','Matches Excel model Scenario 3'],
-    ['Population (P)','=params.pop','Used in all UC volume calculations'],
-    ['Age-eligible %','=params.age+"%"','% of population aged 15+'],
-    ['Yr 1 Enrollment %','=params.enr1+"%"','Digital ID coverage at model start'],
-    ['Target Enrollment %','=params.enrt+"%"','Long-run enrollment goal'],
-    ['Enrollment Ramp (yrs)','=params.enrs','Years to approach enrollment target'],
-    ['TECH5-SA SPV %','=params.spv+"%"','Suggested 25% — confirm per deal; SAU precedent is 15%'],
-    ['OTR eKYC (USD)','=rates.eT2','Somalia OTR — gov-set rate to relying parties'],
-    ['eKYC T1 cost','=rates.eT1','Biometric-only base (ABIS+Liveness+E&O)'],
-    ['Auth L1','=rates.aL1','Biometric auth, no liveness'],
-    ['CI L1','=rates.cL1','Credential issuance biometric'],
-    ['CV L1','=rates.vL1','Credential verification biometric'],
-    ['Pay flat','=rates.pay','Payment rail event'],
-    ['Included Use Cases','=UC.filter(u=>isEnabled(u.id)).length','Active UCs in this export'],
-    ['Total Use Cases','=UC.length','Full 164-UC scope'],
-    ['','',''],
-    ['SOM SHEET COLUMN MAPPING (for Excel model plug-in)','',''],
-    ['Col 38 Unit p(u)','← InputC_SOM · column E (Unit_Price)','Copy range E2:E165 → SOM!AM7:AM170'],
-    ['Col 43 P (Pop)','← InputT_SOM · column E (P_Population)','Same value for all rows = total pop'],
-    ['Col 44 A (Apply)','← InputT_SOM · column F (A_Applicability)','Copy F2:F165 → SOM!AQ7:AQ170'],
-    ['Col 45 E (Freq)','← InputT_SOM · column G (E_Frequency)','Copy G2:G165 → SOM!AR7:AR170'],
-    ['Cols 46-55 AR Yr1-10','← InputT_SOM · columns H-Q (AR_Yr1..Yr10)','Copy H2:Q165 → SOM!AS7:BB170'],
-  ];
-  // Evaluate expressions
-  const evalMeta=metaRows.map(r=>r.map(c=>{
-    if(typeof c==='string'&&c.startsWith('=')){
-      try{return eval(c.slice(1));}catch(e){return c;}
-    }return c;
-  }));
-  evalMeta[1][1]=new Date().toISOString().slice(0,10);
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(evalMeta),'SOM_Meta');
-
-  // ── Sheet 2: SOM_AR_Ramp ──────────────────────────────────────────────────
-  const arSheet=[
-    ['ADOPTION RAMP — AR(y) — fraction of applicable population that has adopted service in year y'],
-    ['NOTE: Values are FRACTIONS (÷100 from the % shown in the partner form). Matches SOM sheet Cols 46–55.'],
+    ['Archetype','Gazelle','5–20M population'],
+    ['Total Population',pop,'Used in V = P × A × AR[y] × E × p(u)'],
+    ['Age-eligible %',+document.getElementById('p-age')?.value||58,'% of pop aged 15+'],
+    ['Yr1 Enrollment %',+document.getElementById('p-enr1')?.value||18,'Digital ID coverage at model start'],
+    ['Target Enrollment %',+document.getElementById('p-enrt')?.value||55,'Long-run enrollment'],
+    ['Enrollment Ramp (yrs)',+document.getElementById('p-enrs')?.value||8,''],
+    ['TECH5-SA SPV %',Math.round(spv*100),'Suggestive — confirm per deal terms'],
+    ['OTR eKYC T2 (USD)',rates.eT2,'Gov-set rate to relying parties'],
+    ['eKYC T1 rate',rates.eT1,'ABIS + liveness + E&O cost floor'],
+    ['Auth L1',rates.aL1,''],['CI L1',rates.cL1,''],['CV L1',rates.vL1,''],
     [''],
-    ['AR_Yr1\n2027','AR_Yr2\n2028','AR_Yr3\n2029','AR_Yr4\n2030','AR_Yr5\n2031',
-     'AR_Yr6\n2032','AR_Yr7\n2033','AR_Yr8\n2034','AR_Yr9\n2035','AR_Yr10\n2036'],
-    OV.AR.map(v=>+(v/100).toFixed(4)),
+    ['SCENARIO AUTO-DERIVATION FROM CLIENT BASELINE','',''],
+    ['Scenario','LoA','eKYC Tier','A scale','E scale','AR vs Baseline'],
+    ['Conservative','Base (L0)','T1 $0.23','×0.60','×0.75','×0.55'],
+    ['Baseline','L1','T1 $'+rates.eT1,'×1.00','×1.00','client inputs'],
+    ['Optimistic','L2','T2 $'+rates.eT2,'×1.35','×1.20','×1.70'],
     [''],
-    ['% form (as entered in partner form):'],
-    OV.AR.map(v=>+v.toFixed(2)),
+    ['SOM SHEET COLUMN MAPPING','',''],
+    ['Col 38  Unit p(u)','← InputC_SOM col E/H/K (per scenario)','Copy to SOM!AL7:AL170'],
+    ['Col 44  A (Apply)','← InputC_SOM col F/I/L (P_val)','Copy to SOM!AR7:AR170'],
+    ['Col 45  E (Freq)', '← InputC_SOM col G/J/M (E_val)','Copy to SOM!AS7:AS170'],
+    ['Cols 46–55 AR Yr1–10','← InputC_SOM cols O-X / Z-AI / AK-AT','Copy to SOM!AT7:BC170'],
   ];
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(arSheet),'SOM_AR_Ramp');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(metaAoa),'Country_Meta');
 
-  // ── Sheet 3: InputC_SOM ───────────────────────────────────────────────────
-  // Matches SOM sheet cols A-B, O-AO range (pricing block)
-  // Key output: Unit p(u) → Col 38 in SOM sheet
-  const icHdr=['Sector','UC-Code','Use Case','Enabled (1/0)','Unit_Price\np(u) USD',
-    'eKYC_Tier','CI_LoA','CV_LoA','Auth_LoA','Services_Composite'];
+  // ── Sheet 2: InputC_SOM ──────────────────────────────────────────────────
+  // One row per UC, 3 scenario blocks side by side
+  // Block = p(u) · A(apply) · E(freq) · AR_Yr1..10  → 13 cols each
+  const icHdr1=[
+    'Sector','UC-Code','Use Case','Enabled (1=include)',
+    // Conservative block (cols E–Q)
+    '◄ CONSERVATIVE ►','p(u) USD\n(Col 38)','A (Apply)\n(Col 44)','E (Freq)\n(Col 45)',
+    ...YEARS.map((_,t)=>`AR_Yr${t+1}\n${2027+t}\n(Col ${46+t})`),
+    // Baseline block (cols R–AD)
+    '◄ BASELINE ►','p(u) USD','A (Apply)','E (Freq)',
+    ...YEARS.map((_,t)=>`AR_Yr${t+1}\n${2027+t}`),
+    // Optimistic block (cols AE–AQ)
+    '◄ OPTIMISTIC ►','p(u) USD','A (Apply)','E (Freq)',
+    ...YEARS.map((_,t)=>`AR_Yr${t+1}\n${2027+t}`),
+  ];
   const icRows=UC.map(u=>{
     const en=isEnabled(u.id)?1:0;
-    const sug=sugPrice(u.svcs,rates);
-    const pr=OV.prices[u.id]!==undefined?OV.prices[u.id]:sug;
-    const ekyc=u.svcs.ekyc||'—';
-    const ci=u.svcs.ci||'—';
-    const cv=u.svcs.cv||'—';
-    const auth=u.svcs.auth||'—';
-    const svcsStr=Object.entries(u.svcs).filter(([k,v])=>v).map(([k,v])=>k+':'+v).join(' | ');
-    return[u.s,u.id,u.n,en,+pr.toFixed(4),ekyc,ci,cv,auth,svcsStr];
+    const sv=getScenValues(u,rates);
+    const mkBlock=s=>[
+      '',n4(sv[s].p),n5(sv[s].A),n4(sv[s].E),...sv[s].ar.map(v=>+v.toFixed(5))
+    ];
+    return[u.s,u.id,u.n,en,...mkBlock('conservative'),...mkBlock('baseline'),...mkBlock('optimistic')];
   });
-  const icSheet=[
-    ['OmniTrust Somalia — InputC (Unit Prices) — plug into SOM sheet Col 38 (Unit p(u))'],
-    ['Enabled=1 rows are active; Enabled=0 rows are excluded from model.'],
-    [''],
-    icHdr,...icRows,
-    [''],
-    ['SUMMARY'],
-    ['Total included UCs',UC.filter(u=>isEnabled(u.id)).length],
-    ['Total excluded UCs',UC.filter(u=>!isEnabled(u.id)).length],
-  ];
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(icSheet),'InputC_SOM');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([
+    ['OmniTrust Somalia — InputC_SOM — All 3 Scenarios · Paste into SOM sheet Cols 38, 44, 45, 46-55'],
+    ['A (Apply) = client P_val. Conservative A×0.60, Optimistic A×1.35. AR values are fractions (not %).'],
+    [''],icHdr1,...icRows
+  ]),'InputC_SOM');
 
-  // ── Sheet 4: InputT_SOM ───────────────────────────────────────────────────
-  // Matches SOM sheet cols 43–55: P(pop), A(apply), E(freq), AR Yr1-Yr10
-  const itHdr=['Sector','UC-Code','Use Case','Enabled (1/0)',
-    'P_Population\n(Col 43)','A_Applicability\n(Col 44)','E_Frequency\n(Col 45)',
-    ...yrs.map((y,t)=>`AR_Yr${t+1}\n${y}\n(Col ${46+t})`)];
-  const arFracs=OV.AR.map(v=>+(v/100).toFixed(4));
-  const itRows=UC.map(u=>{
-    const en=isEnabled(u.id)?1:0;
-    const A_val=+getOv(OV.P,u.id,sugP(u)).toFixed(4);
-    const E_val=+getOv(OV.E,u.id,sugE(u)).toFixed(3);
-    return[u.s,u.id,u.n,en,params.pop,A_val,E_val,...arFracs];
-  });
-  const itSheet=[
-    ['OmniTrust Somalia — InputT Volume Drivers — plug into SOM sheet Cols 43–55'],
-    ['P=total population (same for all rows). A=applicability fraction. E=events/user/yr.'],
-    ['AR values are FRACTIONS — these map directly to SOM sheet Cols 46-55 (AR Yr1-Yr10).'],
-    [''],
-    itHdr,...itRows,
-  ];
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(itSheet),'InputT_SOM');
-
-  // ── Sheet 5: Output_Projection ────────────────────────────────────────────
-  // Matches SOM sheet cols 56-75: V Yr1-10, R Yr1-10
-  const opHdr=['Sector','UC-Code','Use Case','Enabled',
-    'p(u)\nUnit Price','A\nApplicability','E\nFreq/yr',
-    ...yrs.map(y=>`V_${y}\nEvents`),...yrs.map(y=>`R_${y}\nUSD`),
-    '10yr_Events\nTotal','10yr_OT_Rev\nUSD','10yr_T5_Rev\nUSD'];
-  const opRows=proj
-    .sort((a,b)=>b.totRev-a.totRev)
-    .map(({uc,rows,totRev})=>{
-      const en=isEnabled(uc.id)?1:0;
-      const sug=sugPrice(uc.svcs,rates);
-      const pr=OV.prices[uc.id]!==undefined?OV.prices[uc.id]:sug;
-      const A_val=+getOv(OV.P,uc.id,sugP(uc)).toFixed(4);
-      const E_val=+getOv(OV.E,uc.id,sugE(uc)).toFixed(3);
-      const vols=rows.map(r=>+r.events.toFixed(0));
-      const revs=rows.map(r=>+r.rev.toFixed(2));
+  // ── Sheets 3–5: Output per scenario ─────────────────────────────────────
+  SCENS.forEach(scen=>{
+    const label=SCEN_LABELS[scen];
+    const rows=UC.map(u=>{
+      const sv=getScenValues(u,rates);
+      const {revs}=projectScenUC(sv[scen],pop);
+      const vols=sv[scen].ar.map(arY=>pop*sv[scen].A*arY*sv[scen].E);
       const totV=vols.reduce((a,b)=>a+b,0);
-      return[uc.s,uc.id,uc.n,en,+pr.toFixed(4),A_val,E_val,
-        ...vols,...revs,+totV.toFixed(0),+totRev.toFixed(2),+(totRev*spv).toFixed(2)];
-    });
-  // Summary rows
-  const totRevByYr=yrs.map((_,t)=>proj.filter(p=>isEnabled(p.uc.id)).reduce((s,{rows})=>s+rows[t].rev,0));
-  const totVolByYr=yrs.map((_,t)=>proj.filter(p=>isEnabled(p.uc.id)).reduce((s,{rows})=>s+rows[t].events,0));
-  const enrByYr=yrs.map((_,t)=>Math.round(params.pop*params.age/100*enrollment(t,params)));
-  const opSheet=[
-    ['OmniTrust Somalia — 10-Year Projection Output (2027–2036)'],
-    [`Generated ${new Date().toISOString().slice(0,10)} · Somalia · SPV ${Math.round(spv*100)}% · ${UC.filter(u=>isEnabled(u.id)).length} use cases included`],
-    [''],
-    opHdr,...opRows,
-    [''],
-    ['YEAR SUMMARY (included UCs only)','','','','','','',
-     ...totVolByYr.map(v=>+v.toFixed(0)),
-     ...totRevByYr.map(v=>+v.toFixed(2)),
-     +totVolByYr.reduce((a,b)=>a+b,0).toFixed(0),
-     +totRevByYr.reduce((a,b)=>a+b,0).toFixed(2),
-     +(totRevByYr.reduce((a,b)=>a+b,0)*spv).toFixed(2)],
-    ['Enrolled Population','','','','','','',
-     ...enrByYr,
-     ...new Array(10).fill(''),
-     '','',''],
-  ];
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(opSheet),'Output_Projection');
+      const totR=revs.reduce((a,b)=>a+b,0);
+      return[u.s,u.id,u.n,isEnabled(u.id)?1:0,
+        n4(sv[scen].p),n5(sv[scen].A),n4(sv[scen].E),
+        ...vols.map(v=>+v.toFixed(1)),...revs.map(v=>+v.toFixed(2)),
+        +totV.toFixed(0),+totR.toFixed(2),+(totR*spv).toFixed(2)];
+    }).sort((a,b)=>b[b.length-2]-a[b.length-2]);
+    const hdr=['Sector','UC-Code','Use Case','Enabled',
+      'p(u)','A (Apply)','E (Freq)',
+      ...YEARS.map(y=>`V_${y} Events`),...YEARS.map(y=>`R_${y} USD`),
+      '10yr Events','10yr OT Rev','10yr T5 Rev'];
+    // Summary row
+    const activeRows=rows.filter(r=>r[3]===1);
+    const sumR=['TOTAL (included UCs)','','','','','','',
+      ...YEARS.map((_,t)=>+activeRows.reduce((s,r)=>s+r[7+t],0).toFixed(0)),
+      ...YEARS.map((_,t)=>+activeRows.reduce((s,r)=>s+r[17+t],0).toFixed(2)),
+      +activeRows.reduce((s,r)=>s+r[27],0).toFixed(0),
+      +activeRows.reduce((s,r)=>s+r[28],0).toFixed(2),
+      +activeRows.reduce((s,r)=>s+r[29],0).toFixed(2)];
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([
+      [`OmniTrust Somalia — ${label}`],
+      [`Pop=${pop.toLocaleString()} · SPV ${Math.round(spv*100)}% · ${UC.filter(u=>isEnabled(u.id)).length} UCs included`],
+      [''],hdr,...rows,[''],sumR
+    ]),`Output_${scen.charAt(0).toUpperCase()+scen.slice(1)}`);
+  });
 
-  // ── Sheet 6: Year_Summary ─────────────────────────────────────────────────
-  const yrSumHdr=['Metric','Unit',...yrs,'10yr Total'];
-  const yrSheet=[
-    ['OmniTrust Somalia — Annual Summary (included UCs only)'],
-    [''],
-    yrSumHdr,
-    ['Enrolled Population','persons',...enrByYr,'—'],
-    ['Total Events','count',...totVolByYr.map(v=>+v.toFixed(0)),+totVolByYr.reduce((a,b)=>a+b,0).toFixed(0)],
-    ['OT Revenue (gov-collected)','USD',...totRevByYr.map(v=>+v.toFixed(2)),+totRevByYr.reduce((a,b)=>a+b,0).toFixed(2)],
-    [`TECH5-SA ${Math.round(spv*100)}% SPV Revenue`,'USD',...totRevByYr.map(v=>+(v*spv).toFixed(2)),+(totRevByYr.reduce((a,b)=>a+b,0)*spv).toFixed(2)],
+  // ── Sheet 6: Year_Summary ────────────────────────────────────────────────
+  const ysRows=[
+    ['OmniTrust Somalia — 3-Scenario Year Summary'],[''],
+    ['Scenario','Metric','Unit',...YEARS,'10yr Total'],
   ];
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(yrSheet),'Year_Summary');
+  SCENS.forEach(scen=>{
+    const label=SCEN_LABELS[scen];
+    const activeUCs=UC.filter(u=>isEnabled(u.id));
+    const yrR=YEARS.map((_,t)=>
+      activeUCs.reduce((s,u)=>{ const sv=getScenValues(u,rates); return s+projectScenUC(sv[scen],pop).revs[t]; },0));
+    const yrV=YEARS.map((_,t)=>
+      activeUCs.reduce((s,u)=>{ const sv=getScenValues(u,rates); const vols=sv[scen].ar.map(arY=>pop*sv[scen].A*arY*sv[scen].E); return s+vols[t]; },0));
+    ysRows.push(
+      [label,'OT Revenue','USD',...yrR.map(v=>+v.toFixed(0)),+yrR.reduce((a,b)=>a+b,0).toFixed(0)],
+      [label,`T5 ${Math.round(spv*100)}% Revenue`,'USD',...yrR.map(v=>+(v*spv).toFixed(0)),+(yrR.reduce((a,b)=>a+b,0)*spv).toFixed(0)],
+      [label,'Events','count',...yrV.map(v=>+v.toFixed(0)),+yrV.reduce((a,b)=>a+b,0).toFixed(0)],
+      [''],
+    );
+  });
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(ysRows),'Year_Summary');
 
-  XLSX.writeFile(wb,`OmniTrust_Somalia_PartnerInput_${new Date().toISOString().slice(0,10)}.xlsx`);
+
+  // ── Sheet 7: Platform_Participation ──────────────────────────────────────
+  const platData=calcPlatRevByYear();
+  const platSpv=params.spv;
+  const platHdr=['Institution','Sector','Category','Tier','Annual Fee (USD)','Start Year',
+    ...PLAT_YEARS.map(y=>`Rev_${y}`),'10yr Total'];
+  const platRows=INSTITUTIONS.map(inst=>{
+    const fee=getPlatFee(inst.cat,inst.tier);
+    const revByYr=PLAT_YEARS.map(yr=>yr>=inst.startYr?fee:0);
+    return[inst.name,inst.sector,'Cat '+inst.cat,inst.tier,fee,inst.startYr,...revByYr,revByYr.reduce((a,b)=>a+b,0)];
+  });
+  const platSumRow=['TOTAL','','','','','',
+    ...PLAT_YEARS.map((_,i)=>platData[i].total),platData.reduce((s,d)=>s+d.total,0)];
+  const platT5Row=[`T5 ${Math.round(platSpv*100)}% SPV`,'','','','','',
+    ...PLAT_YEARS.map((_,i)=>+(platData[i].total*platSpv).toFixed(0)),
+    +(platData.reduce((s,d)=>s+d.total,0)*platSpv).toFixed(0)];
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([
+    ['OmniTrust Somalia — Platform Participation Revenue (L2)'],
+    [`${INSTITUTIONS.length} institutions · SPV ${Math.round(platSpv*100)}%`],
+    [''],
+    ['Fee Schedule:','Cat A Tiers: RP-T1=$'+OV_PLAT_A.T1+' / T2=$'+OV_PLAT_A.T2+' / T3=$'+OV_PLAT_A.T3+' / T4=$'+OV_PLAT_A.T4+' / T5=$'+OV_PLAT_A.T5],
+    ['','Cat B Tiers: IV-T1=$'+OV_PLAT_B.T1+' / T2=$'+OV_PLAT_B.T2+' / T3=$'+OV_PLAT_B.T3+' / T4=$'+OV_PLAT_B.T4+' / T5=$'+OV_PLAT_B.T5],
+    [''],
+    platHdr,...platRows,[''],platSumRow,platT5Row,
+  ]),'Platform_Participation');
+
+  XLSX.writeFile(wb,`OmniTrust_Somalia_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 
 // ── Legacy CSV (single sheet, backwards compat) ────────────────────────────
@@ -1207,19 +1638,19 @@ function exportCSV_legacy(){
 // ── Save / Load ───────────────────────────────────────────────────────────────
 function exportJSON(){
   const data={meta:{country:'Somalia',date:new Date().toISOString().slice(0,10),version:'1.0'},
-    globalRates:{eT1:+document.getElementById('sr-eT1').value,
-      eT2:+document.getElementById('sr-eT2').value,
-      aL1:+document.getElementById('sr-aL1').value,
-      cL1:+document.getElementById('sr-cL1').value,
-      vL1:+document.getElementById('sr-vL1').value,
-      pay:+document.getElementById('sr-pay').value},
+    globalRates:(()=>{const g=id=>+(document.getElementById(id)?.value)||0;
+      return{eT1:g('sr-eT1'),eT2:g('sr-eT2'),
+        aBase:g('sr-aBase'),aL1:g('sr-aL1'),aL2:g('sr-aL2'),aL3:g('sr-aL3'),
+        cBase:g('sr-cBase'),cL1:g('sr-cL1'),cL2:g('sr-cL2'),cL3:g('sr-cL3'),
+        vBase:g('sr-vBase'),vL1:g('sr-vL1'),vL2:g('sr-vL2'),vL3:g('sr-vL3'),
+        pay:g('sr-pay')};})(),
     params:{pop:+document.getElementById('p-pop').value,
       age:+document.getElementById('p-age').value,
       enr1:+document.getElementById('p-enr1').value,
       enrt:+document.getElementById('p-enrt').value,
       enrs:+document.getElementById('p-enrs').value,
       spv:+document.getElementById('p-spv').value},
-    AR:OV.AR,prices:OV.prices,P:OV.P,E:OV.E,enabled:OV.enabled};
+    AR:OV.AR,prices:OV.prices,P:OV.P,E:OV.E,enabled:OV.enabled,svcs:OV.svcs};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
@@ -1247,6 +1678,7 @@ function loadFromFile(evt){
       if(d.P)OV.P=d.P;
       if(d.E)OV.E=d.E;
       if(d.enabled)OV.enabled=d.enabled;
+      if(d.svcs)OV.svcs=d.svcs;
       renderPriceTbl();recalc();
       unsaved=false;updateUnsavedDot();
       alert('✓ Data loaded from '+f.name);
@@ -1256,7 +1688,7 @@ function loadFromFile(evt){
 }
 function resetForm(){
   if(!confirm('Reset all overrides to suggested values?'))return;
-  OV={prices:{},P:{},E:{},AR:[...SOM_AR_DEF],enabled:{}};
+  OV={prices:{},P:{},E:{},AR:[...SOM_AR_DEF],enabled:{},svcs:{}};
   buildARGrid();renderPriceTbl();recalc();
   unsaved=false;updateUnsavedDot();
 }
@@ -1281,6 +1713,297 @@ function exportCSV(){
   a.href=URL.createObjectURL(blob);
   a.download=`OmniTrust_Somalia_Projection_${new Date().toISOString().slice(0,10)}.csv`; // legacy
   a.click();
+}
+
+
+// ── Scenario derivation (auto from client baseline) ──────────────────────────
+// Conservative: Base LoA, P_val×0.60, E×0.75, AR×0.55
+// Baseline:     client inputs (L1 LoA, partner P/E/AR)
+// Optimistic:   L2+T2 LoA, P_val×1.35, E×1.20, AR×1.70
+const CONS_AR_F=[0.00623,0.01291,0.02545,0.04597,0.07301,0.10006,0.12057,0.13311,0.13979,0.14309];
+const OPT_AR_F =[0.01926,0.03992,0.07868,0.14209,0.22568,0.30926,0.37267,0.41143,0.43209,0.44229];
+
+function scenSugPrice(svcs, loa, ekycRate, rates){
+  // Build rate lookup from live rates object
+  const r={
+    Base: {auth:rates.aBase, ci:rates.cBase, cv:rates.vBase},
+    L1:   {auth:rates.aL1,   ci:rates.cL1,   cv:rates.vL1},
+    L2:   {auth:rates.aL2,   ci:rates.cL2,   cv:rates.vL2},
+    L3:   {auth:rates.aL3,   ci:rates.cL3,   cv:rates.vL3},
+  }[loa] || {auth:rates.aBase, ci:rates.cBase, cv:rates.vBase};
+  let p=0;
+  if(svcs.ekyc) p+=ekycRate;
+  if(svcs.ci)   p+=r.ci;
+  if(svcs.cv)   p+=r.cv;
+  if(svcs.auth) p+=r.auth;
+  if(svcs.pay)  p+=rates.pay||0.10;
+  return+p.toFixed(4);
+}
+
+function getScenValues(uc, rates){
+  // Baseline = client's actual inputs (with any service mix overrides applied)
+  const effSvcs = getUCSvcs(uc);
+  const baseP   = OV.prices[uc.id]!==undefined ? OV.prices[uc.id] : sugPrice(effSvcs,rates);
+  const baseA   = getOv(OV.P, uc.id, sugP(uc));   // P_val: applicability of enrolled pop
+  const baseE   = getOv(OV.E, uc.id, sugE(uc));   // E: events/user/yr
+  const baseAR  = OV.AR.map(v=>v/100);             // AR as fractions
+  const otr     = +document.getElementById('sr-eT2')?.value||1.76;
+  return{
+    // Conservative: step each service tier DOWN one level from client's baseline
+    // Optimistic: step each service tier UP one level from client's baseline
+    conservative:{ p:+sugPrice(deriveSvcs(effSvcs,-1),rates).toFixed(4), A:+(baseA*0.60).toFixed(5), E:+(baseE*0.75).toFixed(4), ar:CONS_AR_F },
+    baseline:    { p:+baseP.toFixed(4),                                   A:+(baseA*1.00).toFixed(5), E:+(baseE*1.00).toFixed(4), ar:baseAR    },
+    optimistic:  { p:+sugPrice(deriveSvcs(effSvcs,+1),rates).toFixed(4), A:+(baseA*1.35).toFixed(5), E:+(baseE*1.20).toFixed(4), ar:OPT_AR_F  },
+  };
+}
+
+function projectScenUC(sv, pop){
+  // V = pop × A × AR[y] × E  (SOM sheet formula, static enrollment baked into A)
+  const revs=sv.ar.map(arY=>pop*sv.A*arY*sv.E*sv.p);
+  return{ revs, tot10:revs.reduce((a,b)=>a+b,0) };
+}
+
+function renderScenStrip(){
+  const div=document.getElementById('scen-strip'); if(!div)return;
+  const params=getParams(), rates=getRates();
+  const pop=params.pop, spv=params.spv;
+  const SCENS=[
+    {k:'conservative',cls:'cons',lbl:'Conservative',desc:'Base LoA · P×0.60 · E×0.75 · AR×0.55'},
+    {k:'baseline',    cls:'base',lbl:'Baseline',    desc:'L1 LoA · client inputs · status quo'},
+    {k:'optimistic',  cls:'opt', lbl:'Optimistic',  desc:'L2 LoA · T2 eKYC · P×1.35 · E×1.20 · AR×1.70'},
+  ];
+  const totals={conservative:0,baseline:0,optimistic:0};
+  UC.filter(u=>isEnabled(u.id)).forEach(u=>{
+    const sv=getScenValues(u,rates);
+    SCENS.forEach(s=>{ totals[s.k]+=projectScenUC(sv[s.k],pop).tot10; });
+  });
+  div.innerHTML=SCENS.map(s=>`
+    <div class="sc-card ${s.cls}">
+      <div class="sc-lbl">${s.lbl}</div>
+      <div class="sc-desc">${s.desc}</div>
+      <div class="sc-rev">${fM(totals[s.k])}</div>
+      <div class="sc-sub">10yr OmniTrust Platform Revenue</div>
+    </div>`).join('');
+}
+
+
+// ── Platform Participation ────────────────────────────────────────────────────
+const PLAT_YEARS = [2027,2028,2029,2030,2031,2032,2033,2034,2035,2036];
+
+// Fee schedules (editable via DOM)
+const PLAT_DEF_A = {T1:1000,T2:3000,T3:6000,T4:10000,T5:15000};
+const PLAT_DEF_B = {T1:5000,T2:10000,T3:20000,T4:30000,T5:45000};
+const PLAT_TIER_INFO = {
+  T1:{name:'Micro',   desc:'Small NGOs, community orgs, pilots',  events:'Up to ~5K events/yr'},
+  T2:{name:'Small',   desc:'Startups, small businesses, clinics',  events:'Up to ~20K events/yr'},
+  T3:{name:'Medium',  desc:'Mid-size enterprises, regional banks', events:'Up to ~50K events/yr'},
+  T4:{name:'Large',   desc:'Large banks, telecoms, major entities',events:'Up to ~100K events/yr'},
+  T5:{name:'National',desc:'National-scale institutions, govt',    events:'High-volume usage'},
+};
+
+// Overrides for tier fees
+let OV_PLAT_A = {...PLAT_DEF_A};
+let OV_PLAT_B = {...PLAT_DEF_B};
+
+function getPlatFee(cat,tier){
+  return (cat==='A'?OV_PLAT_A:OV_PLAT_B)[tier]||0;
+}
+function onPlatFeeChange(cat,tier,val){
+  const v=parseFloat(val);
+  if(!isNaN(v)&&v>=0){
+    if(cat==='A')OV_PLAT_A[tier]=v; else OV_PLAT_B[tier]=v;
+  }
+  markUnsaved();
+  renderInstTable();renderPlatSummary();renderPlatKPIs();
+}
+
+// Pre-populated Somalia institution pipeline
+let INSTITUTIONS = [
+  // Cat B — Issuer+Verifier
+  {id:'i1', name:'NIRA (National ID Reg.)', sector:'Government', cat:'B', tier:'T5', startYr:2027},
+  {id:'i2', name:'Hormuud Telecom (EVC)', sector:'Telecommunications', cat:'B', tier:'T4', startYr:2027},
+  {id:'i3', name:'Dahabshiil Bank', sector:'Banking', cat:'B', tier:'T3', startYr:2027},
+  {id:'i4', name:'Taaj Money Transfer', sector:'Fintech/Remittance', cat:'B', tier:'T2', startYr:2027},
+  {id:'i5', name:'Salaam Somali Bank', sector:'Banking', cat:'B', tier:'T2', startYr:2027},
+  {id:'i6', name:'Telesom', sector:'Telecommunications', cat:'B', tier:'T3', startYr:2028},
+  {id:'i7', name:'Hormuud Bank', sector:'Banking', cat:'B', tier:'T2', startYr:2028},
+  {id:'i8', name:'Ministry of Finance', sector:'Government', cat:'B', tier:'T3', startYr:2028},
+  {id:'i9', name:'Somali National University', sector:'Education', cat:'B', tier:'T2', startYr:2028},
+  {id:'i10',name:'Premier Bank Somalia', sector:'Banking', cat:'B', tier:'T2', startYr:2029},
+  {id:'i11',name:'SomLink Internet', sector:'Telecommunications', cat:'B', tier:'T2', startYr:2029},
+  {id:'i12',name:'Sahal Financial Services', sector:'Fintech/Remittance', cat:'B', tier:'T2', startYr:2029},
+  // Cat A — RP Access
+  {id:'i13',name:'UNHCR Somalia', sector:'NGO / International', cat:'A', tier:'T3', startYr:2027},
+  {id:'i14',name:'WFP Somalia', sector:'NGO / International', cat:'A', tier:'T3', startYr:2027},
+  {id:'i15',name:'Kaah Exchange', sector:'Fintech/Remittance', cat:'A', tier:'T1', startYr:2027},
+  {id:'i16',name:'Somalia Customs Auth.', sector:'Government', cat:'A', tier:'T3', startYr:2028},
+  {id:'i17',name:'Mogadishu Port Authority', sector:'Government', cat:'A', tier:'T2', startYr:2028},
+  {id:'i18',name:'SNAI Insurance', sector:'Insurance', cat:'A', tier:'T2', startYr:2028},
+  {id:'i19',name:'Mercy Corps Somalia', sector:'NGO / International', cat:'A', tier:'T2', startYr:2028},
+  {id:'i20',name:'Aden Abdulle Hospital', sector:'Health', cat:'A', tier:'T2', startYr:2029},
+  {id:'i21',name:'National Insurance Somalia', sector:'Insurance', cat:'A', tier:'T2', startYr:2029},
+  {id:'i22',name:'SIMAD University', sector:'Education', cat:'A', tier:'T1', startYr:2029},
+  {id:'i23',name:'Mogadishu University', sector:'Education', cat:'A', tier:'T2', startYr:2030},
+  {id:'i24',name:'Somalia Revenue Authority', sector:'Government', cat:'A', tier:'T3', startYr:2030},
+];
+let instIdCounter = 25;
+
+function renderFeeSchedule(){
+  ['A','B'].forEach(cat=>{
+    const tbody=document.getElementById('cat-'+cat.toLowerCase()+'-tbl');if(!tbody)return;
+    const fees=cat==='A'?OV_PLAT_A:OV_PLAT_B;
+    tbody.innerHTML=Object.entries(fees).map(([tier,fee])=>{
+      const ti=PLAT_TIER_INFO[tier];
+      return`<tr style="border-bottom:1px solid var(--lt)">
+        <td style="padding:5px 8px;font-size:9.5px;font-family:monospace;color:var(--mid)">${cat==='A'?'RP':'IV'}-${tier}</td>
+        <td style="padding:5px 8px;font-weight:700">${ti.name}</td>
+        <td style="padding:5px 8px;color:var(--mid);font-size:10px">${ti.desc}</td>
+        <td style="padding:5px 8px;text-align:right">
+          <div style="display:flex;align-items:center;justify-content:flex-end;gap:2px">
+            <span style="font-size:10px;color:var(--mid)">$</span>
+            <input type="number" value="${fee}" min="0" step="500"
+              style="width:72px;text-align:right;padding:3px 5px;border:1px solid var(--lt);
+                border-radius:3px;font-size:11px;font-weight:700;color:var(--navy);font-family:monospace"
+              oninput="onPlatFeeChange('${cat}','${tier}',this.value)">
+            <span style="font-size:9px;color:var(--mid)">/yr</span>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  });
+}
+
+function renderInstTable(){
+  const tbody=document.getElementById('inst-tbody');if(!tbody)return;
+  const spv=getParams().spv;
+  tbody.innerHTML=INSTITUTIONS.map(inst=>{
+    const fee=getPlatFee(inst.cat,inst.tier);
+    const yrCells=PLAT_YEARS.map(yr=>{
+      if(yr>=inst.startYr){
+        const c=inst.cat==='A'?'#2563EB':'#006767';
+        return`<td style="padding:4px 6px;text-align:right;font-family:monospace;font-size:10px;color:${c}">
+          ${fee>=1000?'$'+(fee/1000).toFixed(0)+'K':'$'+fee}</td>`;
+      }
+      return`<td style="padding:4px 6px;text-align:right;color:#DDD;font-size:10px">—</td>`;
+    }).join('');
+    const activeYrs=PLAT_YEARS.filter(y=>y>=inst.startYr).length;
+    const tot10=activeYrs*fee;
+    const catBadge=inst.cat==='A'?
+      '<span style="background:#EFF6FF;color:#2563EB;font-size:8px;font-weight:700;padding:1px 5px;border-radius:3px">Cat A</span>':
+      '<span style="background:#E0F0F0;color:#006767;font-size:8px;font-weight:700;padding:1px 5px;border-radius:3px">Cat B</span>';
+    return`<tr style="border-bottom:1px solid rgba(27,58,106,.06)">
+      <td style="padding:5px 8px;min-width:170px">
+        <input value="${inst.name}" style="width:100%;border:1px solid transparent;background:transparent;
+          font-size:11px;font-weight:600;color:var(--navy);padding:2px 4px;border-radius:3px"
+          onfocus="this.style.borderColor='var(--lt)'" onblur="this.style.borderColor='transparent'"
+          oninput="updateInstName('${inst.id}',this.value)">
+      </td>
+      <td style="padding:5px 8px;font-size:10px;color:var(--mid);white-space:nowrap">${inst.sector}</td>
+      <td style="padding:5px 8px;text-align:center">${catBadge}</td>
+      <td style="padding:5px 8px;text-align:center">
+        <select style="font-size:10px;font-weight:700;border:1px solid var(--lt);border-radius:3px;
+          padding:2px 4px;background:white;color:var(--navy)"
+          onchange="updateInstTier('${inst.id}',this.value)">
+          ${['T1','T2','T3','T4','T5'].map(t=>`<option value="${t}" ${inst.tier===t?'selected':''}>${t} ${PLAT_TIER_INFO[t].name}</option>`).join('')}
+        </select>
+      </td>
+      <td style="padding:5px 8px;text-align:center;font-family:monospace;font-size:10.5px;font-weight:700;color:${inst.cat==='A'?'#2563EB':'#006767'}">
+        $${fee.toLocaleString()}
+      </td>
+      <td style="padding:5px 8px;text-align:center">
+        <select style="font-size:10px;font-weight:700;border:1px solid var(--lt);border-radius:3px;
+          padding:2px 4px;background:white;color:var(--navy)"
+          onchange="updateInstStart('${inst.id}',+this.value)">
+          ${PLAT_YEARS.map(y=>`<option value="${y}" ${inst.startYr===y?'selected':''}>${y}</option>`).join('')}
+        </select>
+      </td>
+      ${yrCells}
+      <td style="padding:5px 6px;text-align:right;font-family:monospace;font-size:10px;font-weight:700;color:var(--navy)">
+        ${tot10>=1000?'$'+(tot10/1000).toFixed(0)+'K':'$'+tot10}
+      </td>
+      <td style="padding:5px 4px;text-align:center">
+        <button onclick="removeInstitution('${inst.id}')" style="border:none;background:none;
+          color:var(--mid);cursor:pointer;font-size:13px;padding:2px 5px" title="Remove">×</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function updateInstName(id,v){const i=INSTITUTIONS.find(x=>x.id===id);if(i)i.name=v;markUnsaved();}
+function updateInstTier(id,v){const i=INSTITUTIONS.find(x=>x.id===id);if(i)i.tier=v;markUnsaved();renderInstTable();renderPlatSummary();renderPlatKPIs();}
+function updateInstStart(id,v){const i=INSTITUTIONS.find(x=>x.id===id);if(i)i.startYr=v;markUnsaved();renderInstTable();renderPlatSummary();renderPlatKPIs();}
+function removeInstitution(id){INSTITUTIONS=INSTITUTIONS.filter(x=>x.id!==id);markUnsaved();renderInstTable();renderPlatSummary();renderPlatKPIs();}
+function addInstitution(){
+  INSTITUTIONS.push({id:'i'+(instIdCounter++),name:'New Institution',sector:'Other',cat:'A',tier:'T2',startYr:2028});
+  markUnsaved();renderInstTable();renderPlatSummary();renderPlatKPIs();
+  // scroll to bottom of institution table
+  const tbody=document.getElementById('inst-tbody');
+  if(tbody)tbody.lastElementChild?.scrollIntoView({behavior:'smooth'});
+}
+
+function calcPlatRevByYear(){
+  return PLAT_YEARS.map(yr=>{
+    let catA=0,catB=0,cntA=0,cntB=0;
+    INSTITUTIONS.forEach(inst=>{
+      if(yr>=inst.startYr){
+        const fee=getPlatFee(inst.cat,inst.tier);
+        if(inst.cat==='A'){catA+=fee;cntA++;}else{catB+=fee;cntB++;}
+      }
+    });
+    return{yr,catA,catB,total:catA+catB,cntA,cntB,cnt:cntA+cntB};
+  });
+}
+
+function renderPlatSummary(){
+  const tbody=document.getElementById('plat-sum-tbody');if(!tbody)return;
+  const data=calcPlatRevByYear();
+  const spv=getParams().spv;
+  const rows=[
+    {lbl:'Active Cat A Institutions',vals:data.map(d=>d.cntA),fmt:v=>v,bold:false,unit:''},
+    {lbl:'Active Cat B Institutions',vals:data.map(d=>d.cntB),fmt:v=>v,bold:false,unit:''},
+    {lbl:'Cat A Platform Revenue',vals:data.map(d=>d.catA),fmt:fM,bold:false,cls:'blue'},
+    {lbl:'Cat B Platform Revenue',vals:data.map(d=>d.catB),fmt:fM,bold:false,cls:'teal'},
+    {lbl:'Total Platform Revenue',vals:data.map(d=>d.total),fmt:fM,bold:true,cls:'navy'},
+    {lbl:`OmniTrust Revenue Share`,vals:data.map(d=>d.total*spv),fmt:fM,bold:true,cls:'orange'},
+  ];
+  const CLR={blue:'#2563EB',teal:'#006767',navy:'#1B3A6A',orange:'#F26522','':`var(--near)`};
+  tbody.innerHTML=rows.map(r=>{
+    const tot=r.vals.reduce((a,b)=>a+b,0);
+    const c=CLR[r.cls||'']||'var(--near)';
+    return`<tr style="border-bottom:1px solid rgba(27,58,106,.06)${r.bold?';background:rgba(27,58,106,.03)':''}">
+      <td style="padding:5px 10px;font-weight:${r.bold?700:600};font-size:11px;color:${c}">${r.lbl}</td>
+      ${r.vals.map(v=>`<td style="padding:5px 6px;text-align:right;font-family:monospace;font-size:10.5px;color:${c}">${r.fmt(v)}</td>`).join('')}
+      <td style="padding:5px 10px;text-align:right;font-family:monospace;font-size:10.5px;font-weight:700;color:${c}">${r.fmt(tot)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderPlatKPIs(){
+  const div=document.getElementById('plat-kpis');if(!div)return;
+  const data=calcPlatRevByYear();
+  const spv=getParams().spv;
+  const tot10=data.reduce((s,d)=>s+d.total,0);
+  const t5tot=tot10*spv;
+  const maxInst=data[data.length-1].cnt;
+  const yr1=data[0];
+  const kpis=[
+    {lbl:'10yr Platform Revenue',val:fM(tot10),sub:'L2 institutional subscriptions',cls:'orange'},
+    {lbl:'10yr OmniTrust Revenue Share',val:fM(t5tot),sub:'Platform revenue to OmniTrust',cls:'teal'},
+    {lbl:'Institutions by 2036',val:maxInst,sub:`${data[0].cnt} at launch in 2027`,cls:''},
+    {lbl:'Year-1 Platform Rev',val:fM(yr1.total),sub:`${yr1.catA?fM(yr1.catA)+' Cat A · ':''}${fM(yr1.catB)} Cat B`,cls:''},
+  ];
+  div.innerHTML=kpis.map(k=>`<div class="kpi ${k.cls}">
+    <div class="kpi-lbl">${k.lbl}</div>
+    <div class="kpi-val">${k.val}</div>
+    <div class="kpi-sub">${k.sub}</div>
+  </div>`).join('');
+}
+
+function initPlatformTab(){
+  renderFeeSchedule();
+  renderInstTable();
+  renderPlatSummary();
+  renderPlatKPIs();
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
