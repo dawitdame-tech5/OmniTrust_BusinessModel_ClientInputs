@@ -238,6 +238,16 @@ select.ramp-sel.ramp-changed{border-color:var(--orange);background:var(--orange-
 .kpi.teal .kpi-val{color:var(--teal)}
 .kpi-sub{font-size:10px;color:var(--mid);margin-top:2px}
 
+/* Year revenue strip — small boxes, one row, same overall width as the KPI console above it */
+.year-rev-strip{display:grid;grid-template-columns:repeat(11,1fr);gap:5px;margin-bottom:16px}
+.year-box{background:var(--white);border:1px solid var(--lt);border-radius:6px;
+  padding:5px 2px;text-align:center;border-top:2px solid var(--orange);min-width:0}
+.year-box .yr-lbl{font-size:8px;font-weight:700;color:var(--mid)}
+.year-box .yr-val{font-size:10.5px;font-weight:700;color:var(--navy);
+  font-family:'SF Mono','Fira Code',monospace;margin-top:2px;white-space:nowrap}
+.year-box.tot{border-top-color:var(--navy)}
+.year-box.tot .yr-val{color:var(--orange)}
+
 /* Instruction box */
 .instr{background:var(--navy-lt);border:1px solid rgba(27,58,106,.20);
   border-left:3px solid var(--navy);border-radius:0 var(--r) var(--r) 0;
@@ -659,12 +669,12 @@ for(var p=0,v=0;p!==c.length;++p)if((v=c.charCodeAt(p))===n||v===i||v===34||f.fo
   <div class="instr">
     <b>Instructions — Volume &amp; Projection:</b>
     Fill in the three parameters per use case:
-    <b>P</b> = applicability (% of Somalia's enrolled population that would use this service),
+    <b>P</b> = applicability (% of Somalia's <u>total</u> population that would use this service),
     <b>E</b> = event frequency (times per user per year),
     <b>A</b> = year 1 adoption rate (% of applicable users active in 2027).
-    The <b>Adoption Ramp (AR)</b> defines how adoption grows from 2027 to 2036.
+    The <b>Adoption Ramp (AR)</b> defines how adoption grows from 2027 to 2036, and Total Population itself compounds yearly at the Population Growth rate below.
     All suggested values reflect Somalia's nascent digital infrastructure context.
-    Revenue = Enrolled Pop × P% × AR[year] × E × Unit Price. All figures in USD.
+    Revenue = Population[year] × P% × AR[year] × E × Unit Price — matching the master model's own Volume formula, capped so a use case's users can never exceed that year's Digital ID holders (Population × Age-Eligible % × Enrollment %, the same figure shown in the Enrolled Population row). That cap ramps up over the 4-year Enrollment period and then holds flat — it only reduces Volume where demand would otherwise exceed how many people could plausibly hold an ID that year. All figures in USD.
     Use the <b>Active scenario</b> picker below to view the whole dashboard under Conservative, Baseline, or Optimistic assumptions — CSV/XLSX exports always report Baseline.
   </div>
 
@@ -678,23 +688,28 @@ for(var p=0,v=0;p!==c.length;++p)if((v=c.charCodeAt(p))===n||v===i||v===34||f.fo
           <input type="number" id="p-pop" value="17500000" step="100000" oninput="recalc()">
         </div>
         <div class="param-item">
+          <label>Population Growth (%/yr)</label>
+          <input type="number" id="p-popgr" value="2.5" step="0.1" min="0" max="10" oninput="recalc()">
+          <div class="hint">Compounds 2027→2036 (Somalia ~2.4%/yr actual)</div>
+        </div>
+        <div class="param-item">
           <label>Age-Eligible (15+) %</label>
           <input type="number" id="p-age" value="58" step="1" min="10" max="95" oninput="recalc()">
-          <div class="hint">% of pop aged 15+</div>
+          <div class="hint">Feeds the Digital ID holder cap on Volume (see Enrolled Population row)</div>
         </div>
         <div class="param-item">
           <label>Yr 1 Enrollment %</label>
           <input type="number" id="p-enr1" value="18" step="1" min="1" max="100" oninput="recalc()">
-          <div class="hint">Digital ID coverage 2027</div>
+          <div class="hint">Digital ID coverage 2027 — caps Volume, doesn't discount it directly</div>
         </div>
         <div class="param-item">
           <label>Target Enrollment %</label>
           <input type="number" id="p-enrt" value="55" step="1" min="1" max="100" oninput="recalc()">
-          <div class="hint">Long-run enrollment goal</div>
+          <div class="hint">Long-run enrollment goal — caps Volume, doesn't discount it directly</div>
         </div>
         <div class="param-item">
           <label>Enrollment Ramp (yrs)</label>
-          <input type="number" id="p-enrs" value="8" step="1" min="1" max="10" oninput="recalc()">
+          <input type="number" id="p-enrs" value="4" step="1" min="1" max="10" oninput="recalc()">
           <div class="hint">Years to reach target</div>
         </div>
 <input type="hidden" id="p-spv" value="25">
@@ -715,6 +730,9 @@ for(var p=0,v=0;p!==c.length;++p)if((v=c.charCodeAt(p))===n||v===i||v===34||f.fo
   <!-- KPIs -->
   <div class="kpi-strip" id="scen-strip"></div>
   <div class="kpi-strip" id="kpi-strip"></div>
+
+  <!-- OT Revenue by year, compact (millions) -->
+  <div class="year-rev-strip" id="year-rev-strip"></div>
 
   <!-- Sector filter -->
   <div class="sec-nav" id="sec-nav-1"></div>
@@ -788,7 +806,7 @@ for(var p=0,v=0;p!==c.length;++p)if((v=c.charCodeAt(p))===n||v===i||v===34||f.fo
     </div>
   </div>
 
-  
+
 </div>
 
 
@@ -932,6 +950,16 @@ function escAttr(s){
 
 // ── UC Data (164 use cases) ────────────────────────────────────────────────────
 const UC = [{"id":"UC-01-001","s":"Foundational Identity & Population Registers","n":"National Digital ID — Issuance","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-01-002","s":"Foundational Identity & Population Registers","n":"National Digital ID — Update identity attributes","svcs":{"ci":"L1","auth":"L1"}},{"id":"UC-01-003","s":"Foundational Identity & Population Registers","n":"National Digital ID — Download verified copy","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-01-004","s":"Foundational Identity & Population Registers","n":"Sub-national / Residency ID — Issuance & lifecycle","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-01-005","s":"Foundational Identity & Population Registers","n":"Sub-national / Residency ID — Verification","svcs":{"ekyc":"T1","cv":"L1","auth":"L1"}},{"id":"UC-01-006","s":"Foundational Identity & Population Registers","n":"National Digital ID — Renewal","svcs":{"ci":"L1","cv":"L1","auth":"L1"}},{"id":"UC-02-001","s":"Civil Registration & Vital Statistics","n":"Birth — Registration","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-02-002","s":"Civil Registration & Vital Statistics","n":"Birth — Certificate issuance","svcs":{"ci":"L1","auth":"L1"}},{"id":"UC-02-003","s":"Civil Registration & Vital Statistics","n":"Birth — Late registration","svcs":{"ci":"L1","auth":"L1"}},{"id":"UC-02-005","s":"Civil Registration & Vital Statistics","n":"Marriage — Registration & solemnization","svcs":{"ci":"L1","auth":"L1"}},{"id":"UC-02-007","s":"Civil Registration & Vital Statistics","n":"Death — Registration","svcs":{"ci":"L1","auth":"L1"}},{"id":"UC-02-008","s":"Civil Registration & Vital Statistics","n":"Death — Certificate issuance","svcs":{"ci":"L1","auth":"L1"}},{"id":"UC-03-001","s":"Citizenship & Immigration","n":"Passport — New application & issuance","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-03-002","s":"Citizenship & Immigration","n":"Passport — Renewal","svcs":{"ci":"L1","auth":"L1"}},{"id":"UC-03-003","s":"Citizenship & Immigration","n":"Passport — Replacement","svcs":{"ci":"L1","auth":"L1"}},{"id":"UC-03-004","s":"Citizenship & Immigration","n":"Electronic visa — Application","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-03-006","s":"Citizenship & Immigration","n":"Work permit — Application & issuance","svcs":{"auth":"L0"}},{"id":"UC-03-007","s":"Citizenship & Immigration","n":"Residence permit — Issuance & lifecycle","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-03-008","s":"Citizenship & Immigration","n":"Student entry permit — Application","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-03-010","s":"Citizenship & Immigration","n":"Citizenship status — Proof & verification","svcs":{"ekyc":"T1","cv":"L1","auth":"L1"}},{"id":"UC-04-001","s":"Financial Services","n":"Bank account opening — Identity verification","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-04-002","s":"Financial Services","n":"Person-to-person transfer — Instant payment","svcs":{"auth":"L0"}},{"id":"UC-04-003","s":"Financial Services","n":"Government-to-person transfer — Disbursement","svcs":{"auth":"L0"}},{"id":"UC-04-004","s":"Financial Services","n":"Cross-border payment","svcs":{"auth":"L0"}},{"id":"UC-04-005","s":"Financial Services","n":"Remittance — Customer onboarding & payout","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-04-006","s":"Financial Services","n":"Payment wallet — Issuance & identity link","svcs":{"auth":"L0"}},{"id":"UC-04-008","s":"Financial Services","n":"Microfinance account opening","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-04-009","s":"Financial Services","n":"Savings cooperative — Member onboarding","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-04-010","s":"Financial Services","n":"Savings cooperative — Loan application","svcs":{"auth":"L0"}},{"id":"UC-04-012","s":"Financial Services","n":"Savings or term deposit — Account operations","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-04-013","s":"Financial Services","n":"Micro-insurance — Onboarding & claims","svcs":{"auth":"L0"}},{"id":"UC-04-014","s":"Financial Services","n":"Digital credit provider — Onboarding","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-04-015","s":"Financial Services","n":"Payment wallet — Cash-in/out & agent management","svcs":{"auth":"L0"}},{"id":"UC-04-017","s":"Financial Services","n":"Insurance policy — Onboarding","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-04-018","s":"Financial Services","n":"Capital markets account — Onboarding","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-05-001","s":"Social Protection & Government Benefits","n":"Social benefit — Beneficiary enrollment","svcs":{"ekyc":"T1","ci":"L0"}},{"id":"UC-05-002","s":"Social Protection & Government Benefits","n":"Social benefit — Eligibility determination","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-05-003","s":"Social Protection & Government Benefits","n":"Social benefit — Payment to bank account","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-05-004","s":"Social Protection & Government Benefits","n":"Social benefit — Payment to mobile wallet","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-05-005","s":"Social Protection & Government Benefits","n":"Social benefit — Cash-out at agent","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-05-006","s":"Social Protection & Government Benefits","n":"Social benefit — Grievance & redress","svcs":{"auth":"L0"}},{"id":"UC-05-007","s":"Social Protection & Government Benefits","n":"Disability register — Enrollment & certificate","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-05-008","s":"Social Protection & Government Benefits","n":"National social fund — Member registration","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-05-009","s":"Social Protection & Government Benefits","n":"National social fund — Benefit claim","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-06-001","s":"Telecommunications","n":"Mobile SIM — New line registration","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-06-002","s":"Telecommunications","n":"Mobile SIM — Annual subscriber re-verification","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-06-004","s":"Telecommunications","n":"Mobile number portability — Identity check","svcs":{"auth":"L0"}},{"id":"UC-06-005","s":"Telecommunications","n":"Fixed broadband — Subscriber identity verification","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-06-006","s":"Telecommunications","n":"Embedded SIM — Activation & device provisioning","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-06-008","s":"Telecommunications","n":"Digital communications account — Signup","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-06-009","s":"Telecommunications","n":"Mobile account — Ongoing subscriber authentication","svcs":{"auth":"L0"}},{"id":"UC-07-001","s":"Health & Health Insurance","n":"Health insurance — Member enrollment","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-07-002","s":"Health & Health Insurance","n":"Health insurance — Policy renewal","svcs":{"ci":"L1","cv":"L1","auth":"L1"}},{"id":"UC-07-003","s":"Health & Health Insurance","n":"Health insurance — Digital card issuance","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-07-004","s":"Health & Health Insurance","n":"Health insurance — Member claim submission","svcs":{"auth":"L0"}},{"id":"UC-07-005","s":"Health & Health Insurance","n":"Health insurance — Provider claim submission","svcs":{"auth":"L0"}},{"id":"UC-07-006","s":"Health & Health Insurance","n":"Vaccination record — Proof presentation","svcs":{"auth":"L0"}},{"id":"UC-07-007","s":"Health & Health Insurance","n":"Medical test result — Proof presentation","svcs":{"ekyc":"T1","cv":"L1","auth":"L1"}},{"id":"UC-07-008","s":"Health & Health Insurance","n":"Health professional licence — Renewal (doctor)","svcs":{"ci":"L1","cv":"L1","auth":"L1"}},{"id":"UC-07-009","s":"Health & Health Insurance","n":"Health professional licence — Renewal (nurse)","svcs":{"ci":"L1","cv":"L1","auth":"L1"}},{"id":"UC-07-010","s":"Health & Health Insurance","n":"Health professional licence — Renewal (pharmacist)","svcs":{"ci":"L1","cv":"L1","auth":"L1"}},{"id":"UC-07-011","s":"Health & Health Insurance","n":"Health facility — Licensing","svcs":{"ci":"L1","auth":"L1"}},{"id":"UC-07-013","s":"Health & Health Insurance","n":"Food handler — Medical fitness certificate","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-07-020","s":"Health & Health Insurance","n":"Patient identity — Medical record linking","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-07-021","s":"Health & Health Insurance","n":"Public health programme — Enrollment","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-07-022","s":"Health & Health Insurance","n":"Health provider — Credentialing & network enrollment","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-07-023","s":"Health & Health Insurance","n":"Electronic prescription — Dispensing & verification","svcs":{"ekyc":"T1","cv":"L1","auth":"L1"}},{"id":"UC-08-001","s":"Education & Employment","n":"School — Student enrollment","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-08-002","s":"Education & Employment","n":"Examination — Registration","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-08-005","s":"Education & Employment","n":"Degree or diploma — Verification","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-08-006","s":"Education & Employment","n":"Teaching licence — Renewal","svcs":{"ci":"L1","cv":"L1","auth":"L1"}},{"id":"UC-08-007","s":"Education & Employment","n":"Teacher registry — Onboarding & payroll update","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-08-008","s":"Education & Employment","n":"Scholarship or grant — Application","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-08-009","s":"Education & Employment","n":"Lifelong learning record — Skills portfolio","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-08-010","s":"Education & Employment","n":"Academic transcript — Request & digital delivery","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-08-011","s":"Education & Employment","n":"Vocational training — Learner registration","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-08-014","s":"Education & Employment","n":"Vocational training — Certificate issuance","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-08-015","s":"Education & Employment","n":"Vocational training — Certificate verification","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-08-017","s":"Education & Employment","n":"Student loan or bursary — Application","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-09-004","s":"Transport & Mobility — Aviation","n":"Air travel — Online check-in","svcs":{"auth":"L0"}},{"id":"UC-09-005","s":"Transport & Mobility — Aviation","n":"Air travel — Pre-departure document check","svcs":{"ekyc":"T1","cv":"L1","auth":"L1"}},{"id":"UC-09-006","s":"Transport & Mobility — Aviation","n":"Air travel — Biometric boarding","svcs":{"ekyc":"T1","cv":"L1","auth":"L1"}},{"id":"UC-10-003","s":"Transport & Mobility — Road","n":"Vehicle registration — New & insurance verification","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-10-004","s":"Transport & Mobility — Road","n":"Driving licence — Issuance, renewal & demerit","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-10-005","s":"Transport & Mobility — Road","n":"Vehicle roadworthiness — Inspection certificate","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-11-001","s":"Transport & Mobility — Transit","n":"Public transit pass — Purchase","svcs":{"auth":"L0"}},{"id":"UC-11-003","s":"Transport & Mobility — Transit","n":"Public transit concession — Approval","svcs":{"auth":"L0"}},{"id":"UC-11-004","s":"Transport & Mobility — Transit","n":"Public transit gate — Entry (tap and go)","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-12-001","s":"Cross-Border & Border Control","n":"Border crossing — Digital travel credential","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-13-001","s":"Tourism & Hospitality","n":"Hotel — Digital check-in","svcs":{"ekyc":"T1","auth":"L1"}},{"id":"UC-13-003","s":"Tourism & Hospitality","n":"Car rental — Pickup identity & driving privilege check","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-13-004","s":"Tourism & Hospitality","n":"Tourist visa or visitor permit — Fast-track","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-13-005","s":"Tourism & Hospitality","n":"Event accreditation — Registration & ticketing","svcs":{"ci":"L1","cv":"L1","auth":"L1"}},{"id":"UC-14-001","s":"Media & Entertainment","n":"Age-restricted content — Access authorisation","svcs":{"ekyc":"T1","cv":"L1","auth":"L1"}},{"id":"UC-14-002","s":"Media & Entertainment","n":"Event ticket — Purchase","svcs":{"auth":"L0"}},{"id":"UC-14-003","s":"Media & Entertainment","n":"Venue entry — Ticket presentation","svcs":{"auth":"L0"}},{"id":"UC-14-004","s":"Media & Entertainment","n":"Subscription service — Signup or renewal","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-15-001","s":"Commerce, Trade & Logistics","n":"Business onboarding — Know-your-business","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-15-002","s":"Commerce, Trade & Logistics","n":"Business registration — Incorporation","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-15-003","s":"Commerce, Trade & Logistics","n":"Online marketplace seller — Onboarding","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-15-004","s":"Commerce, Trade & Logistics","n":"Merchant payment terminal — Onboarding","svcs":{"ekyc":"T1"}},{"id":"UC-15-006","s":"Commerce, Trade & Logistics","n":"Trade document — Certificate of origin verification","svcs":{"ekyc":"T1","cv":"L1","auth":"L1"}},{"id":"UC-15-008","s":"Commerce, Trade & Logistics","n":"Customs duty — Payment","svcs":{"auth":"L0"}},{"id":"UC-15-009","s":"Commerce, Trade & Logistics","n":"Import or export permit — Application","svcs":{"auth":"L0"}},{"id":"UC-15-011","s":"Commerce, Trade & Logistics","n":"Customs clearance — Declaration & risk scoring","svcs":{"auth":"L0"}},{"id":"UC-15-013","s":"Commerce, Trade & Logistics","n":"Certificate of origin — Issuance","svcs":{"ci":"L1","auth":"L1"}},{"id":"UC-16-001","s":"Property, Land & Housing","n":"Land title — Cadastral registration & issuance","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-16-002","s":"Property, Land & Housing","n":"Property — Registration & title transfer","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-16-003","s":"Property, Land & Housing","n":"Land title — Verification","svcs":{"auth":"L0"}},{"id":"UC-16-004","s":"Property, Land & Housing","n":"Lease — Application","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-16-005","s":"Property, Land & Housing","n":"Tenancy — Applicant screening","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-16-006","s":"Property, Land & Housing","n":"Building permit & occupancy certificate","svcs":{"auth":"L0"}},{"id":"UC-16-008","s":"Property, Land & Housing","n":"Property tax — Payment","svcs":{"auth":"L0"}},{"id":"UC-16-009","s":"Property, Land & Housing","n":"Housing subsidy — Application","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-17-001","s":"Utilities & Energy","n":"Electricity — New service connection","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-17-002","s":"Utilities & Energy","n":"Water — New service connection","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-17-004","s":"Utilities & Energy","n":"Utility subsidy or relief — Application","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-17-005","s":"Utilities & Energy","n":"Clean cooking programme — Beneficiary enrollment","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-17-007","s":"Utilities & Energy","n":"Utility customer — Identity refresh & arrears recovery","svcs":{"ci":"L1","auth":"L1"}},{"id":"UC-18-001","s":"Justice, Public Safety & Elections","n":"Voter registration — New or transfer","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-18-002","s":"Justice, Public Safety & Elections","n":"Election worker — Accreditation & custody chain","svcs":{"ci":"L1","cv":"L1","auth":"L1"}},{"id":"UC-18-003","s":"Justice, Public Safety & Elections","n":"Legal professional — Credential check","svcs":{"ekyc":"T1","cv":"L1","auth":"L1"}},{"id":"UC-18-006","s":"Justice, Public Safety & Elections","n":"Court — Electronic filing submission","svcs":{"auth":"L0"}},{"id":"UC-18-007","s":"Justice, Public Safety & Elections","n":"Police — Incident reporting","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-18-008","s":"Justice, Public Safety & Elections","n":"Police clearance — Criminal record certificate","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-18-010","s":"Justice, Public Safety & Elections","n":"Legal aid — Public defender intake","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-18-012","s":"Justice, Public Safety & Elections","n":"Voter eligibility — Identity check","svcs":{"ekyc":"T1","cv":"L1","auth":"L1"}},{"id":"UC-21-001","s":"Civil Service","n":"Civil servant identity card — Issuance & lifecycle","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-21-002","s":"Civil Service","n":"Civil servant identity card — Verification","svcs":{"ekyc":"T1","cv":"L1","auth":"L1"}},{"id":"UC-21-003","s":"Civil Service","n":"Government services portal — Account creation","svcs":{"auth":"L0"}},{"id":"UC-22-001","s":"Security Services & Emergency Personnel","n":"Defence forces personnel ID — Issuance","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-22-002","s":"Security Services & Emergency Personnel","n":"Police personnel ID — Issuance","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-23-001","s":"Agriculture, Forestry & Rural Services","n":"Farmer registry — Household & plot registration","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-23-003","s":"Agriculture, Forestry & Rural Services","n":"Produce traceability — Certificate of origin","svcs":{"ekyc":"T1","cv":"L1","auth":"L1"}},{"id":"UC-23-005","s":"Agriculture, Forestry & Rural Services","n":"Agricultural extension — Farmer enrollment","svcs":{"ci":"L1","auth":"L1"}},{"id":"UC-23-006","s":"Agriculture, Forestry & Rural Services","n":"Agricultural input subsidy — Electronic voucher","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-23-007","s":"Agriculture, Forestry & Rural Services","n":"Livestock identification — Tag issuance & updates","svcs":{"ci":"L1","auth":"L1"}},{"id":"UC-23-008","s":"Agriculture, Forestry & Rural Services","n":"Livestock movement — Permit & health attestation","svcs":{"auth":"L0"}},{"id":"UC-23-009","s":"Agriculture, Forestry & Rural Services","n":"Rural landholding certificate — Issuance","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-23-011","s":"Agriculture, Forestry & Rural Services","n":"Farmers cooperative — Governance","svcs":{"auth":"L0"}},{"id":"UC-24-002","s":"Environment & Natural Resources","n":"Extractive industries licence — Mining or quarrying","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-25-001","s":"Disaster Risk Management & Humanitarian Aid","n":"Disaster response — Beneficiary targeting & registry","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-25-002","s":"Disaster Risk Management & Humanitarian Aid","n":"Humanitarian aid — Cash or in-kind distribution","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-25-003","s":"Disaster Risk Management & Humanitarian Aid","n":"Early warning — Subscription & evacuation list","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-26-001","s":"Municipal & Local Government Services","n":"Local government — Service desk & complaint ticketing","svcs":{"auth":"L0"}},{"id":"UC-26-003","s":"Municipal & Local Government Services","n":"Local government — Parking penalty payment","svcs":{"auth":"L0"}},{"id":"UC-26-004","s":"Municipal & Local Government Services","n":"Local government — Civil fees & levies","svcs":{"auth":"L0"}},{"id":"UC-26-005","s":"Municipal & Local Government Services","n":"Community programme — Enrollment & targeting","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-26-006","s":"Municipal & Local Government Services","n":"Local elections — Civic registry & participation","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-26-007","s":"Municipal & Local Government Services","n":"Local government — Service request & tracking","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-26-008","s":"Municipal & Local Government Services","n":"Municipal business licence — SME","svcs":{"auth":"L0"}},{"id":"UC-26-009","s":"Municipal & Local Government Services","n":"Property rates & land tax — Assessment & payment","svcs":{"auth":"L0"}},{"id":"UC-26-010","s":"Municipal & Local Government Services","n":"Waste collection — Subscription & payment","svcs":{"auth":"L0"}},{"id":"UC-26-015","s":"Municipal & Local Government Services","n":"Grievance & ombudsperson — Intake","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-27-001","s":"Tax & Revenue Administration","n":"Taxpayer registration — Identification number","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-27-002","s":"Tax & Revenue Administration","n":"Tax filing — Submission & payment authorisation","svcs":{"auth":"L0"}},{"id":"UC-27-003","s":"Tax & Revenue Administration","n":"Withholding tax — Returns & reconciliation","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-27-004","s":"Tax & Revenue Administration","n":"Tax compliance — Audit & case management","svcs":{"auth":"L0"}},{"id":"UC-27-005","s":"Tax & Revenue Administration","n":"Property tax — Valuation & electronic assessment","svcs":{"auth":"L0"}},{"id":"UC-28-001","s":"Digital Economy & Innovation","n":"Digital wallet — Issuance & identity-linked account","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-28-002","s":"Digital Economy & Innovation","n":"Personal data exchange — Consent registry","svcs":{"ci":"L1","cv":"L1","auth":"L1"}},{"id":"UC-30-004","s":"Other Services","n":"Private membership pass — Gym, library or club","svcs":{"ci":"L1","auth":"L1"}},{"id":"UC-30-007","s":"Other Services","n":"Gaming or lottery — Player age-verification","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-30-008","s":"Other Services","n":"Prize claim — Identity verification & payout","svcs":{"ekyc":"T1","cv":"L1","auth":"L1"}}];
+// Use-case classification reference, sourced from the OmniTrust master model's Zambia (ZMB)
+// country tab — the same 164-use-case catalog underlies every country, so this metadata
+// (nature of the use case, ramp classification, mandate status) travels across countries even
+// though the volumes/pricing are Somalia-specific. Used to populate the SOM export sheet's
+// descriptive columns so it matches the master model's layout exactly. Custom use cases added
+// in this tool won't have an entry here (shown blank in the export — they are not part of the
+// shared catalog).
+const UC_META_REF = {"UC-01-001":{"oa":"Data Record / Evidence","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Easy","rs":"Slow","cs":0,"md":"Yes"},"UC-01-002":{"oa":"Data Record / Evidence","oc":"D","ac":"Update","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":0,"md":"No"},"UC-01-003":{"oa":"Data Record / Evidence","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Easy","rs":"Slow","cs":0,"md":"No"},"UC-01-004":{"oa":"Data Record / Evidence","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":0,"md":"No"},"UC-01-005":{"oa":"Data Record / Evidence","oc":"D","ac":"Prove","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Easy","rs":"Slow","cs":0,"md":"No"},"UC-01-006":{"oa":"Data Record / Evidence","oc":"D","ac":"Update","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Slow","cs":0,"md":"No"},"UC-02-001":{"oa":"Relationship / Household","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Fast","cs":0,"md":"Yes"},"UC-02-002":{"oa":"Relationship / Household","oc":"R","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Slow","cs":0,"md":"No"},"UC-02-003":{"oa":"Relationship / Household","oc":"R","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":0,"md":"No"},"UC-02-005":{"oa":"Relationship / Household","oc":"R","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":0,"md":"No"},"UC-02-007":{"oa":"Relationship / Household","oc":"R","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Fast","cs":0,"md":"Yes"},"UC-02-008":{"oa":"Relationship / Household","oc":"R","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Slow","cs":0,"md":"No"},"UC-03-001":{"oa":"Cross‑border / Travel","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Very Hard","rs":"Slow","cs":1,"md":"No"},"UC-03-002":{"oa":"Cross‑border / Travel","oc":"X","ac":"Update","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Very Hard","rs":"Slow","cs":1,"md":"No"},"UC-03-003":{"oa":"Cross‑border / Travel","oc":"X","ac":"Update","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Very Hard","rs":"Slow","cs":1,"md":"No"},"UC-03-004":{"oa":"Cross‑border / Travel","oc":"X","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Very Hard","rs":"Slow","cs":1,"md":"No"},"UC-03-006":{"oa":"Credential / Qualification","oc":"X","ac":"Authorize","ie":"Yes","de":"No","po":"No","ag":null,"rd":"Very Hard","rs":"Slow","cs":1,"md":"No"},"UC-03-007":{"oa":"Credential / Qualification","oc":"C","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Very Hard","rs":"Slow","cs":1,"md":"No"},"UC-03-008":{"oa":"Data Record / Evidence","oc":"C","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Slow","cs":1,"md":"No"},"UC-03-010":{"oa":"Data Record / Evidence","oc":"D","ac":"Prove","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Very Hard","rs":"Slow","cs":1,"md":"No"},"UC-04-001":{"oa":"Person / Legal Entity","oc":"C","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Medium","cs":2,"md":"No"},"UC-04-002":{"oa":"Transaction","oc":"P/L","ac":"Transact","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Easy","rs":"Fast","cs":2,"md":"No"},"UC-04-003":{"oa":"Entitlement / Benefit / Claim","oc":"T","ac":"Update","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Fast","cs":2,"md":"No"},"UC-04-004":{"oa":"Transaction","oc":"E","ac":"Transact","ie":"Yes","de":"No","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":2,"md":"No"},"UC-04-005":{"oa":"Person / Legal Entity","oc":"X","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Medium","cs":2,"md":"No"},"UC-04-006":{"oa":"Transaction","oc":"P/L","ac":"Transact","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Fast","cs":2,"md":"No"},"UC-04-008":{"oa":"Service Account","oc":"T","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Medium","cs":2,"md":"No"},"UC-04-009":{"oa":"Person / Legal Entity","oc":"S","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Medium","cs":2,"md":"No"},"UC-04-010":{"oa":"Transaction","oc":"P/L","ac":"Transact","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Medium","cs":2,"md":"No"},"UC-04-012":{"oa":"Data Record / Evidence","oc":"P/L","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Easy","rs":"Slow","cs":2,"md":"No"},"UC-04-013":{"oa":"Entitlement / Benefit / Claim","oc":"D","ac":"Transact","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Medium","cs":2,"md":"No"},"UC-04-014":{"oa":"Data Record / Evidence","oc":"E","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Easy","rs":"Medium","cs":2,"md":"No"},"UC-04-015":{"oa":"Data Record / Evidence","oc":"D","ac":"Transact","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Fast","cs":2,"md":"No"},"UC-04-017":{"oa":"Data Record / Evidence","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Medium","cs":2,"md":"No"},"UC-04-018":{"oa":"Person / Legal Entity","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":2,"md":"No"},"UC-05-001":{"oa":"Data Record / Evidence","oc":"P/L","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-05-002":{"oa":"Data Record / Evidence","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-05-003":{"oa":"Entitlement / Benefit / Claim","oc":"D","ac":"Transact","ie":"Yes","de":"No","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-05-004":{"oa":"Entitlement / Benefit / Claim","oc":"E","ac":"Transact","ie":"Yes","de":"No","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-05-005":{"oa":"Data Record / Evidence","oc":"E","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-05-006":{"oa":"Data Record / Evidence","oc":"D","ac":"Remediate","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-05-007":{"oa":"Credential / Qualification","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-05-008":{"oa":"Data Record / Evidence","oc":"C","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-05-009":{"oa":"Entitlement / Benefit / Claim","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Slow","cs":1,"md":"No"},"UC-06-001":{"oa":"Asset / Title / Device","oc":"E","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Fast","cs":2,"md":"Yes"},"UC-06-002":{"oa":"Asset / Title / Device","oc":"A","ac":"Update","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":2,"md":"No"},"UC-06-004":{"oa":"Asset / Title / Device","oc":"A","ac":"Prove","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Easy","rs":"Slow","cs":2,"md":"No"},"UC-06-005":{"oa":"Data Record / Evidence","oc":"A","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":2,"md":"No"},"UC-06-006":{"oa":"Asset / Title / Device","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Slow","cs":2,"md":"No"},"UC-06-008":{"oa":"Data Record / Evidence","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Slow","cs":2,"md":"No"},"UC-06-009":{"oa":"Asset / Title / Device","oc":"A","ac":"Authorize","ie":"No","de":"No","po":"No","ag":null,"rd":"Moderate","rs":"Fast","cs":2,"md":"Yes"},"UC-07-001":{"oa":"Data Record / Evidence","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-07-002":{"oa":"Data Record / Evidence","oc":"D","ac":"Update","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Slow","cs":1,"md":"No"},"UC-07-003":{"oa":"Data Record / Evidence","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-07-004":{"oa":"Entitlement / Benefit / Claim","oc":"D","ac":"Comply","ie":"No","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-07-005":{"oa":"Entitlement / Benefit / Claim","oc":"E","ac":"Comply","ie":"No","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-07-006":{"oa":"Data Record / Evidence","oc":"E","ac":"Prove","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-07-007":{"oa":"Data Record / Evidence","oc":"D","ac":"Prove","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-07-008":{"oa":"Credential / Qualification","oc":"D","ac":"Update","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Fast","cs":1,"md":"Yes"},"UC-07-009":{"oa":"Credential / Qualification","oc":"C","ac":"Update","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Fast","cs":1,"md":"Yes"},"UC-07-010":{"oa":"Credential / Qualification","oc":"C","ac":"Update","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Fast","cs":1,"md":"Yes"},"UC-07-011":{"oa":"Data Record / Evidence","oc":"C","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Fast","cs":1,"md":"Yes"},"UC-07-013":{"oa":"Credential / Qualification","oc":"C","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Slow","cs":1,"md":"No"},"UC-07-020":{"oa":"Data Record / Evidence","oc":"D","ac":"Link","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-07-021":{"oa":"Data Record / Evidence","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-07-022":{"oa":"Data Record / Evidence","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Slow","cs":1,"md":"No"},"UC-07-023":{"oa":"Data Record / Evidence","oc":"D","ac":"Prove","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Slow","cs":1,"md":"No"},"UC-08-001":{"oa":"Data Record / Evidence","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-08-002":{"oa":"Data Record / Evidence","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Medium","cs":1,"md":"No"},"UC-08-005":{"oa":"Credential / Qualification","oc":"C","ac":"Prove","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Medium","cs":1,"md":"No"},"UC-08-006":{"oa":"Credential / Qualification","oc":"C","ac":"Update","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Easy","rs":"Slow","cs":1,"md":"No"},"UC-08-007":{"oa":"Data Record / Evidence","oc":"C","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Slow","cs":1,"md":"No"},"UC-08-008":{"oa":"Data Record / Evidence","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Slow","cs":1,"md":"No"},"UC-08-009":{"oa":"Cross‑border / Travel","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-08-010":{"oa":"Credential / Qualification","oc":"X","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Medium","cs":1,"md":"No"},"UC-08-011":{"oa":"Data Record / Evidence","oc":"C","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Easy","rs":"Medium","cs":1,"md":"No"},"UC-08-014":{"oa":"Credential / Qualification","oc":"C","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Medium","cs":1,"md":"No"},"UC-08-015":{"oa":"Credential / Qualification","oc":"C","ac":"Prove","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Medium","cs":1,"md":"No"},"UC-08-017":{"oa":"Data Record / Evidence","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-09-004":{"oa":"Data Record / Evidence","oc":"T","ac":"Prove","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-09-005":{"oa":"Data Record / Evidence","oc":"D","ac":"Prove","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-09-006":{"oa":"Cross‑border / Travel","oc":"D","ac":"Prove","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-10-003":{"oa":"Asset / Title / Device","oc":"C","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-10-004":{"oa":"Credential / Qualification","oc":"A","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Fast","cs":1,"md":"Yes"},"UC-10-005":{"oa":"Credential / Qualification","oc":"C","ac":"Prove","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Slow","cs":1,"md":"No"},"UC-11-001":{"oa":"Transaction","oc":"C","ac":"Transact","ie":"Yes","de":"No","po":"No","ag":null,"rd":"Hard","rs":"Fast","cs":1,"md":"No"},"UC-11-003":{"oa":"Data Record / Evidence","oc":"D","ac":"Authorize","ie":"Yes","de":"No","po":"No","ag":null,"rd":"Easy","rs":"Slow","cs":1,"md":"No"},"UC-11-004":{"oa":"Data Record / Evidence","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Fast","cs":1,"md":"No"},"UC-12-001":{"oa":"Cross‑border / Travel","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Fast","cs":1,"md":"Yes"},"UC-13-001":{"oa":"Data Record / Evidence","oc":"X","ac":"Prove","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Very Hard","rs":"Slow","cs":1,"md":"No"},"UC-13-003":{"oa":"Data Record / Evidence","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Easy","rs":"Slow","cs":1,"md":"No"},"UC-13-004":{"oa":"Credential / Qualification","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-13-005":{"oa":"Transaction","oc":"C","ac":"Update","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-14-001":{"oa":"Data Record / Evidence","oc":"D","ac":"Prove","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Slow","cs":2,"md":"No"},"UC-14-002":{"oa":"Transaction","oc":"D","ac":"Transact","ie":"Yes","de":"No","po":"No","ag":null,"rd":"Hard","rs":"Slow","cs":2,"md":"No"},"UC-14-003":{"oa":"Transaction","oc":"T","ac":"Prove","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":2,"md":"No"},"UC-14-004":{"oa":"Data Record / Evidence","oc":"T","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":2,"md":"No"},"UC-15-001":{"oa":"Service Account","oc":"C","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Medium","cs":2,"md":"No"},"UC-15-002":{"oa":"Data Record / Evidence","oc":"S","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Medium","cs":2,"md":"No"},"UC-15-003":{"oa":"Person / Legal Entity","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Medium","cs":2,"md":"No"},"UC-15-004":{"oa":"Transaction","oc":"P/L","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Medium","cs":2,"md":"No"},"UC-15-006":{"oa":"Credential / Qualification","oc":"D","ac":"Prove","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Medium","cs":2,"md":"No"},"UC-15-008":{"oa":"Transaction","oc":"T","ac":"Transact","ie":"Yes","de":"No","po":"No","ag":null,"rd":"Moderate","rs":"Medium","cs":2,"md":"No"},"UC-15-009":{"oa":"Credential / Qualification","oc":"T","ac":"Authorize","ie":"Yes","de":"No","po":"No","ag":null,"rd":"Moderate","rs":"Medium","cs":2,"md":"No"},"UC-15-011":{"oa":"Data Record / Evidence","oc":"D","ac":"Authorize","ie":"Yes","de":"No","po":"No","ag":null,"rd":"Hard","rs":"Medium","cs":2,"md":"No"},"UC-15-013":{"oa":"Credential / Qualification","oc":"T","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Medium","cs":2,"md":"No"},"UC-16-001":{"oa":"Asset / Title / Device","oc":"C","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Slow","cs":1,"md":"No"},"UC-16-002":{"oa":"Asset / Title / Device","oc":"A","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Slow","cs":1,"md":"No"},"UC-16-003":{"oa":"Asset / Title / Device","oc":"A","ac":"Prove","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Very Hard","rs":"Slow","cs":1,"md":"No"},"UC-16-004":{"oa":"Asset / Title / Device","oc":"A","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Slow","cs":1,"md":"No"},"UC-16-005":{"oa":"Data Record / Evidence","oc":"A","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Slow","cs":1,"md":"No"},"UC-16-006":{"oa":"Credential / Qualification","oc":"D","ac":"Authorize","ie":"Yes","de":"No","po":"No","ag":null,"rd":"Hard","rs":"Slow","cs":1,"md":"No"},"UC-16-008":{"oa":"Asset / Title / Device","oc":"A","ac":"Transact","ie":"Yes","de":"No","po":"No","ag":null,"rd":"Hard","rs":"Fast","cs":1,"md":"Yes"},"UC-16-009":{"oa":"Entitlement / Benefit / Claim","oc":"A","ac":"Link","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Slow","cs":1,"md":"No"},"UC-17-001":{"oa":"Data Record / Evidence","oc":"E","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Medium","cs":1,"md":"No"},"UC-17-002":{"oa":"Data Record / Evidence","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Medium","cs":1,"md":"No"},"UC-17-004":{"oa":"Entitlement / Benefit / Claim","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Medium","cs":1,"md":"No"},"UC-17-005":{"oa":"Data Record / Evidence","oc":"E","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Easy","rs":"Medium","cs":1,"md":"No"},"UC-17-007":{"oa":"Data Record / Evidence","oc":"A","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Medium","cs":1,"md":"No"},"UC-18-001":{"oa":"Data Record / Evidence","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Fast","cs":0,"md":"Yes"},"UC-18-002":{"oa":"Data Record / Evidence","oc":"D","ac":"Update","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Easy","rs":"Slow","cs":0,"md":"No"},"UC-18-003":{"oa":"Data Record / Evidence","oc":"D","ac":"Prove","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":0,"md":"No"},"UC-18-006":{"oa":"Data Record / Evidence","oc":"D","ac":"Comply","ie":"No","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":0,"md":"No"},"UC-18-007":{"oa":"Data Record / Evidence","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Slow","cs":0,"md":"No"},"UC-18-008":{"oa":"Credential / Qualification","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Slow","cs":0,"md":"No"},"UC-18-010":{"oa":"Data Record / Evidence","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Slow","cs":0,"md":"No"},"UC-18-012":{"oa":"Data Record / Evidence","oc":"D","ac":"Prove","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Fast","cs":0,"md":"Yes"},"UC-21-001":{"oa":"Data Record / Evidence","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Medium","cs":0,"md":"No"},"UC-21-002":{"oa":"Data Record / Evidence","oc":"D","ac":"Prove","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Medium","cs":0,"md":"No"},"UC-21-003":{"oa":"Service Account","oc":"D","ac":"Link","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Medium","cs":0,"md":"No"},"UC-22-001":{"oa":"Data Record / Evidence","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Easy","rs":"Slow","cs":0,"md":"No"},"UC-22-002":{"oa":"Data Record / Evidence","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Easy","rs":"Slow","cs":0,"md":"No"},"UC-23-001":{"oa":"Relationship / Household","oc":"D","ac":"Link","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-23-003":{"oa":"Credential / Qualification","oc":"D","ac":"Prove","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-23-005":{"oa":"Data Record / Evidence","oc":"C","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Slow","cs":1,"md":"No"},"UC-23-006":{"oa":"Entitlement / Benefit / Claim","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-23-007":{"oa":"Data Record / Evidence","oc":"E","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-23-008":{"oa":"Credential / Qualification","oc":"D","ac":"Authorize","ie":"Yes","de":"No","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-23-009":{"oa":"Credential / Qualification","oc":"C","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Slow","cs":1,"md":"No"},"UC-23-011":{"oa":"Data Record / Evidence","oc":"C","ac":"Comply","ie":"No","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Slow","cs":1,"md":"No"},"UC-24-002":{"oa":"Data Record / Evidence","oc":"C","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-25-001":{"oa":"Data Record / Evidence","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-25-002":{"oa":"Data Record / Evidence","oc":"D","ac":"Link","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Slow","cs":1,"md":"No"},"UC-25-003":{"oa":"Data Record / Evidence","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-26-001":{"oa":"Transaction","oc":"D","ac":"Transact","ie":"Yes","de":"No","po":"No","ag":null,"rd":"Moderate","rs":"Medium","cs":1,"md":"No"},"UC-26-003":{"oa":"Asset / Title / Device","oc":"T","ac":"Transact","ie":"Yes","de":"No","po":"No","ag":null,"rd":"Hard","rs":"Medium","cs":1,"md":"No"},"UC-26-004":{"oa":"Transaction","oc":"A","ac":"Transact","ie":"Yes","de":"No","po":"No","ag":null,"rd":"Hard","rs":"Medium","cs":1,"md":"No"},"UC-26-005":{"oa":"Data Record / Evidence","oc":"T","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Hard","rs":"Medium","cs":1,"md":"No"},"UC-26-006":{"oa":"Data Record / Evidence","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Medium","cs":1,"md":"No"},"UC-26-007":{"oa":"Data Record / Evidence","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Medium","cs":1,"md":"No"},"UC-26-008":{"oa":"Credential / Qualification","oc":"D","ac":"Authorize","ie":"Yes","de":"No","po":"No","ag":null,"rd":"Moderate","rs":"Medium","cs":1,"md":"No"},"UC-26-009":{"oa":"Asset / Title / Device","oc":"C","ac":"Transact","ie":"Yes","de":"No","po":"No","ag":null,"rd":"Hard","rs":"Medium","cs":1,"md":"No"},"UC-26-010":{"oa":"Transaction","oc":"A","ac":"Transact","ie":"Yes","de":"No","po":"No","ag":null,"rd":"Moderate","rs":"Medium","cs":1,"md":"No"},"UC-26-015":{"oa":"Data Record / Evidence","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Medium","cs":1,"md":"No"},"UC-27-001":{"oa":"Person / Legal Entity","oc":"D","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Easy","rs":"Slow","cs":1,"md":"No"},"UC-27-002":{"oa":"Transaction","oc":"P/L","ac":"Authorize","ie":"Yes","de":"No","po":"No","ag":null,"rd":"Easy","rs":"Fast","cs":1,"md":"Yes"},"UC-27-003":{"oa":"Data Record / Evidence","oc":"T","ac":"Comply","ie":"No","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Fast","cs":1,"md":"Yes"},"UC-27-004":{"oa":"Data Record / Evidence","oc":"D","ac":"Comply","ie":"No","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-27-005":{"oa":"Asset / Title / Device","oc":"D","ac":"Transact","ie":"Yes","de":"No","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":1,"md":"No"},"UC-28-001":{"oa":"Data Record / Evidence","oc":"A","ac":"Link","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Easy","rs":"Slow","cs":2,"md":"No"},"UC-28-002":{"oa":"Data Record / Evidence","oc":"D","ac":"Update","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":2,"md":"No"},"UC-30-004":{"oa":"Data Record / Evidence","oc":"C","ac":"Create","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":0,"md":"No"},"UC-30-007":{"oa":"Data Record / Evidence","oc":"C","ac":"Prove","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":0,"md":"No"},"UC-30-008":{"oa":"Entitlement / Benefit / Claim","oc":"D","ac":"Prove","ie":"Yes","de":"Yes","po":"No","ag":null,"rd":"Moderate","rs":"Slow","cs":0,"md":"No"}};
+function getUcMeta(id){ return UC_META_REF[id] || {}; }
+
 
 // ── Somalia baseline defaults ────────────────────────────────────────────────
 // Somalia context: dg=0.18, fc=0.25, mf=0.72, cn=0.18, bk=0.22, dl=0.18
@@ -1570,9 +1598,17 @@ const fN=v=>{if(v>=1e9)return(v/1e9).toFixed(2)+'B';if(v>=1e6)return(v/1e6).toFi
 
 function getParams(){
   const g=id=>+document.getElementById(id)?.value||0;
-  return{pop:g('p-pop'),age:g('p-age')/100,enr1:g('p-enr1')/100,
+  return{pop:g('p-pop'),popgr:g('p-popgr')/100,age:g('p-age')/100,enr1:g('p-enr1')/100,
     enrt:g('p-enrt')/100,enrs:g('p-enrs'),spv:g('p-spv')/100};
 }
+// Total Population compounds at Population Growth %/yr from the Year-1 (2027) figure — this IS
+// part of the live Volume/Revenue math (see projectUC), matching the master model's own P(Pop)
+// convention (a single population figure per row/year, no separate age or enrollment gate).
+function popAtYear(t,params){ return params.pop*Math.pow(1+(params.popgr||0),t); }
+// Reference/sense-check curve only (see the "Enrolled Population" row and the SOM sheet's
+// reference columns) — this does NOT reduce Volume/Revenue. Kept so you can compare implied
+// per-use-case demand against how many people are actually expected to hold a digital ID by
+// that year, without that comparison silently double-gating every use case's revenue.
 function enrollment(t,params){
   const{enr1,enrt,enrs}=params;
   if(enrt<=enr1)return enr1;
@@ -1645,16 +1681,25 @@ function scenarioAdjust(uc, rates, scenario){
 function projectUC(uc,params,rates,scenario){
   scenario=scenario||activeScenario;
   const effScenario = scenarioMode==='preset' ? scenario : 'baseline';
-  const totalPop=params.pop;
   const{P_val,E_val,price,ar}=scenarioAdjust(uc,rates,effScenario);
   const rows=YEARS.map((yr,t)=>{
-    const enr=enrollment(t,params);
-    const appPop=totalPop*enr*P_val;
+    // Matches the master model's own Volume formula: V(u,y) = P(Pop) × A(Apply) × AR(y) × E, with
+    // Apply% applying to the (growing) total population directly — but a use case's users can never
+    // exceed the number of people who actually hold a digital ID that year (idCap = Pop(t) ×
+    // Age-Eligible% × Enrollment(t), the same curve behind the "Enrolled Population" KPI). Early on
+    // (Enrollment ramps for 4 years from 18%→55%, then holds flat) this cap is what keeps Volume
+    // realistic even where Apply%/AR alone would imply more users than could possibly hold an ID —
+    // it only binds when demand would exceed that ceiling, so it doesn't uniformly discount every
+    // use case the way multiplying Age%/Enrollment into every row used to.
+    const popT=popAtYear(t,params);
+    const appPop=popT*P_val;
     const adoptFrac=ar[t];
-    const users=appPop*adoptFrac;
+    const usersUncapped=appPop*adoptFrac;
+    const idCap=popT*params.age*enrollment(t,params);
+    const users=Math.min(usersUncapped,idCap);
     const events=users*E_val;
     const rev=events*price;
-    return{yr,enr,appPop,users,events,rev};
+    return{yr,popT,appPop,usersUncapped,idCap,users,events,rev};
   });
   return{uc,rows,totRev:rows.reduce((s,r)=>s+r.rev,0)};
 }
@@ -1788,8 +1833,9 @@ function updateRevCellsOnly(){
 function renderProjSummary(proj,params){
   const tbody=document.getElementById('proj-tbody');if(!tbody)return;
   const spv=params.spv;
-  // Enrolled pop per year
-  const enrPop=YEARS.map((_,t)=>Math.round(params.pop*params.age*enrollment(t,params)));
+  // Enrolled pop per year — this IS the Digital ID holder cap projectUC applies to each use case's
+  // users (see idCap there); shown here as the aggregate ceiling for reference.
+  const enrPop=YEARS.map((_,t)=>Math.round(popAtYear(t,params)*params.age*enrollment(t,params)));
   const totEvents=YEARS.map((_,t)=>proj.reduce((s,{rows})=>s+rows[t].events,0));
   const totRev=YEARS.map((_,t)=>proj.reduce((s,{rows})=>s+rows[t].rev,0));
   const t5Rev=totRev.map(v=>v*spv);
@@ -1807,6 +1853,24 @@ function renderProjSummary(proj,params){
     row('Enrolled Population',enrPop,fN)+
     row('Total Events',totEvents,fN)+
     row('OT Revenue (gov-collected)',totRev,fM,'tot-row')
+  renderYearRevStrip(totRev);
+}
+
+// Compact "OT Revenue by Year" strip, in millions — one small box per year plus a 10yr total,
+// so the headline trend is glanceable without reading the full projection table above.
+function renderYearRevStrip(totRev){
+  const div=document.getElementById('year-rev-strip');if(!div)return;
+  const m=v=>'$'+(v/1e6).toFixed(v>=1e7?1:2)+'M';
+  const tot=totRev.reduce((a,b)=>a+b,0);
+  div.innerHTML=
+    YEARS.map((yr,t)=>`<div class="year-box">
+      <div class="yr-lbl">${yr}</div>
+      <div class="yr-val">${m(totRev[t])}</div>
+    </div>`).join('') +
+    `<div class="year-box tot">
+      <div class="yr-lbl">10YR TOTAL</div>
+      <div class="yr-val">${m(tot)}</div>
+    </div>`;
 }
 
 function renderKPIs(proj,params){
@@ -1818,7 +1882,7 @@ function renderKPIs(proj,params){
   const vol1=proj.reduce((s,{rows})=>s+(rows[0]?.events||0),0);
   const vol10last=proj.reduce((s,{rows})=>s+(rows[9]?.events||0),0);
   const cagr=vol1>0?(Math.pow(Math.max(vol10last,0.001)/Math.max(vol1,0.001),1/9)-1)*100:0;
-  const enr10=Math.round(params.pop*params.age*enrollment(9,params));
+  const enr10=Math.round(popAtYear(9,params)*params.age*enrollment(9,params));
   const ucActive=proj.filter(p=>p.totRev>0).length;
   const kpis=[
     {lbl:'10-Year OT Revenue',val:fM(rev10),sub:'gov-collected · USD','cls':'orange'},
@@ -1928,43 +1992,172 @@ function exportXLSX(){
     ['Country','Somalia',''],
     ['Country Code','SOM',''],
     ['Archetype','Gazelle','5–20M population'],
-    ['Total Population',pop,'Used in V = P × A × AR[y] × E × p(u)'],
-    ['Age-eligible %',+document.getElementById('p-age')?.value||58,'% of pop aged 15+'],
-    ['Yr1 Enrollment %',+document.getElementById('p-enr1')?.value||18,'Digital ID coverage at model start'],
-    ['Target Enrollment %',+document.getElementById('p-enrt')?.value||55,'Long-run enrollment'],
-    ['Enrollment Ramp (yrs)',+document.getElementById('p-enrs')?.value||8,''],
+    ['Total Population (Year 1)',pop,'Used in V(y) = Pop(y) × A × AR[y] × E, Pop(y) compounding at Population Growth %/yr — matches the master model\'s Volume formula'],
+    ['Population Growth %/yr',+document.getElementById('p-popgr')?.value||2.5,'Compounds Total Population 2027→2036'],
+    ['Age-eligible %',+document.getElementById('p-age')?.value||58,'Sense-check reference only — % of pop aged 15+, NOT used in Volume/Revenue'],
+    ['Yr1 Enrollment %',+document.getElementById('p-enr1')?.value||18,'Sense-check reference only — digital ID coverage at model start, NOT used in Volume/Revenue'],
+    ['Target Enrollment %',+document.getElementById('p-enrt')?.value||55,'Sense-check reference only — long-run enrollment goal, NOT used in Volume/Revenue'],
+    ['Enrollment Ramp (yrs)',+document.getElementById('p-enrs')?.value||4,'Sense-check reference only'],
     ['OTR eKYC T2 (USD)',rates.eT2,'Gov-set rate to relying parties'],
     ['eKYC T1 rate',rates.eT1,'ABIS + liveness + E&O cost floor'],
     ['Auth L1',rates.aL1,''],['CI L1',rates.cL1,''],['CV L1',rates.vL1,''],
     [''],
     ['This export reflects Baseline values only (Custom/Preset inputs from the Volumes tab).','',''],
     [''],
-    ['SOM SHEET COLUMN MAPPING','',''],
-    ['Col 38  Unit p(u)','← InputC_SOM col E','Copy to SOM!AL7:AL170'],
-    ['Col 44  A (Apply)','← InputC_SOM col F (P_val)','Copy to SOM!AR7:AR170'],
-    ['Col 45  E (Freq)', '← InputC_SOM col G (E_val)','Copy to SOM!AS7:AS170'],
-    ['Cols 46–55 AR Yr1–10','← InputC_SOM cols H-Q','Copy to SOM!AT7:BC170'],
+    ['SOM SHEET','',''],
+    ['The "SOM" tab is modeled on the structure of your master model\'s per-country revenue tabs (e.g. ZMB): use-case metadata, service Yes/No flags, a CI/Auth LoA one-hot tier matrix, and a flag × rate-card price build-up, followed by ramp classification, P/A/E, and the AR/Volume/Revenue Yr1-10 blocks.','',''],
+    ['This is a live rebuild, not a copy of ZMB\'s numbers — the rate card, flags, and every downstream total (Base/LoA/Pay/Unit price, Volume, Revenue) are driven by formulas that reference your own Price/Volume tab inputs and overrides. Change a flag, a rate, or an override cell in Excel and the row recalculates.','',''],
+    ['Columns are grouped and labeled to match that structure, but the exact column count differs from ZMB (e.g. a live Pay flag and a Price Override / Final Unit Price pair are included here) — treat this as the same build-up logic, not a paste-in-place replica.','',''],
+    ['Descriptive/classification columns (Object of Action, Ramp Difficulty/Speed, Mandate, etc.) are sourced from the shared 164 use-case catalog and show "—" for any custom use case you\'ve added, since those aren\'t part of that catalog.','',''],
   ];
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(metaAoa),'Country_Meta');
 
-  // ── Sheet 2: InputC_SOM ──────────────────────────────────────────────────
-  // One row per UC, Baseline values only: p(u) · A(apply) · E(freq) · AR_Yr1..10
-  const icHdr1=[
-    'Sector','UC-Code','Use Case','Enabled (1=include)',
-    'p(u) USD\n(Col 38)','A (Apply)\n(Col 44)','E (Freq)\n(Col 45)',
-    ...YEARS.map((_,t)=>`AR_Yr${t+1}\n${2027+t}\n(Col ${46+t})`),
+  // ── Sheet 2: SOM ─────────────────────────────────────────────────────────
+  // Modeled on the STRUCTURE of the master model's per-country revenue tab (e.g. "ZMB") — a rate
+  // card of flags × per-unit rates that builds up to a price, then drives Volume and Revenue —
+  // but NOT a copy of its numbers or exact column layout. Every total below (Base/LoA/Pay/Unit
+  // price, Volume, Revenue) is a real Excel formula referencing same-row flag/rate cells, fed from
+  // this tool's own Price/Volume tab inputs, so the sheet stays live and auditable in Excel: change
+  // a flag, a rate, or a Price Override cell and the row recalculates on its own.
+  // Descriptive metadata (Object of Action, Ramp Difficulty/Speed, Mandate, etc.) is sourced from
+  // the shared 164-use-case catalog (see UC_META_REF) since it describes the nature of the use
+  // case rather than Somalia-specific economics; custom use cases added in this tool aren't part
+  // of that catalog and show blank ("—") in those columns.
+  // NB: the master model's cost-side columns (Cost Component flags, Event Cost EC(u,y), Cost
+  // C(u,y) year totals) are a separate cost-modeling dimension this tool doesn't build.
+  const somGroupHdr=[
+    'USE CASE DEFINITION','','','','','','','','','',
+    'SERVICE FLAGS','','','','','',
+    '','',
+    'CI CREDENTIAL LoA','','','',
+    'AUTH LoA','','','',
+    'RATE CARD (USD, from your inputs — live)','','','','','','','','','','',
+    'PRICE BUILD-UP (live formulas)','','','','','',
+    'RAMP CLASSIFICATION (reference)','','','',
+    'VOLUME DRIVERS','','','',
+    'POPULATION Pop(t) — compounds at Population Growth %/yr (live formulas)','','','','','','','','','',
+    'ADOPTION RAMP AR(u,y)','','','','','','','','','',
+    'VOLUME V(u,y) = MIN(Pop(t)×A×AR×E, Digital ID cap×E) (live formulas)','','','','','','','','','',
+    'REVENUE R(u,y) = V×Final Unit Price (live formulas)','','','','','','','','','',
+    'DIGITAL ID CAP INPUTS — Population×Age-Eligible%×Enrollment(t), caps Volume above (see the V(u,y) formula)','','','','','','','','','','',
+    '',
   ];
-  const icRows=UC.map(u=>{
-    const en=isEnabled(u.id)?1:0;
-    const sv=getScenValues(u,rates);
-    const b=sv.baseline;
-    return[u.s,u.id,getDesc(u),en,n4(b.p),n5(b.A),n4(b.E),...b.ar.map(v=>+v.toFixed(5))];
+  const somHdr=[
+    'Sector','UC-Code','Use Case','Object of Action','Object Code','Action','ID Event','Data Exch','Pay (off)','Agency',
+    'eKYC','CI','CV','Auth','Pay','Tier','',
+    'CI L0','CI L1','CI L2','CI L3','Au L0','Au L1','Au L2','Au L3',
+    'eKYC Rate','CI Base Rate','CV Rate','Auth Base Rate','CI L1 Addon','CI L2 Addon','CI L3 Addon','Auth L1 Addon','Auth L2 Addon','Auth L3 Addon','Pay Fee Rate',
+    'Base Total','LoA Total','Pay Fee','Unit p(u)','Price Override','Final Unit Price',
+    'Ramp Difficulty','Ramp Speed','Comp Score','Mandate',
+    'P (Pop, Year 1)','Pop Growth %/yr','A (Apply)','E (Freq)',
+    ...YEARS.map((_,t)=>`Pop Yr${t+1}`),
+    ...YEARS.map((_,t)=>`AR Yr${t+1}`),
+    ...YEARS.map((_,t)=>`V Yr${t+1}`),
+    ...YEARS.map((_,t)=>`R Yr${t+1}`),
+    'Age-Eligible %',
+    ...YEARS.map((_,t)=>`Enrollment Yr${t+1}`),
+    'Enabled (1=include)',
+  ];
+  const yn2=v=>v?'Yes':'No';
+  const somParams=getScenarioParams('baseline');
+  const somScenPop=somParams.pop, somPopGr=somParams.popgr||0, somAge=somParams.age;
+  // Digital ID holder curve — Population(t) × Age-Eligible% × Enrollment(t). This caps Volume below
+  // (see projectScenUC/projectUC's idCap) rather than uniformly discounting every use case.
+  const somEnrArr=YEARS.map((_,t)=>enrollment(t,somParams));
+  const somRows=UC.map(u=>{
+    const meta=getUcMeta(u.id);
+    const effSvcs=getUCSvcs(u);
+    const ekycFlag=!!effSvcs.ekyc, ciFlag=!!effSvcs.ci, cvFlag=!!effSvcs.cv, authFlag=!!effSvcs.auth, payFlag=!!effSvcs.pay;
+    const ciTier=effSvcs.ci, authTier=effSvcs.auth, cvTier=effSvcs.cv;
+    const ci_l0=ciFlag, ci_l1=ciFlag&&ciTier==='L1', ci_l2=ciFlag&&ciTier==='L2', ci_l3=ciFlag&&ciTier==='L3';
+    const au_l0=authFlag, au_l1=authFlag&&authTier==='L1', au_l2=authFlag&&authTier==='L2', au_l3=authFlag&&authTier==='L3';
+    // Rate-card constants (this row's applicable base rates; the L1/L2/L3 addons are the same
+    // global rate-card values on every row — the formulas below pick them up via the flag cells).
+    const ekycRate=ekycFlag?(effSvcs.ekyc==='T2'?rates.eT2:rates.eT1):0;
+    const ciBaseRate=ciFlag?rates.cBase:0, authBaseRate=authFlag?rates.aBase:0;
+    // NB: unlike the reference model (where CV is flat/untiered — "CV Base" only), our tool lets
+    // CV carry its own LoA tier (Base/L1/L2/L3), matching eKYC's T1/T2 pattern — so CV Rate here
+    // reports CV's full effective rate for whichever tier is selected.
+    const cvRate=cvFlag?(cvTier==='L1'?rates.vL1:cvTier==='L2'?rates.vL2:cvTier==='L3'?rates.vL3:rates.vBase):0;
+    const ciL1Adn=n4(rates.cL1-rates.cBase), ciL2Adn=n4(rates.cL2-rates.cBase), ciL3Adn=n4(rates.cL3-rates.cBase);
+    const auL1Adn=n4(rates.aL1-rates.aBase), auL2Adn=n4(rates.aL2-rates.aBase), auL3Adn=n4(rates.aL3-rates.aBase);
+    const payRate=n4(rates.pay);
+    const baseTotal=n4(ekycRate+ciBaseRate+cvRate+authBaseRate);
+    const loaTotal=n4((ci_l1?ciL1Adn:0)+(ci_l2?ciL2Adn:0)+(ci_l3?ciL3Adn:0)+(au_l1?auL1Adn:0)+(au_l2?auL2Adn:0)+(au_l3?auL3Adn:0));
+    const payFeeApplied=payFlag?payRate:0;
+    const unitP=n4(baseTotal+loaTotal+payFeeApplied);
+    const tier=ekycFlag?(effSvcs.ekyc==='T2'?'Tier 2':'Tier 1'):'';
+    const sv=getScenValues(u,rates).baseline;
+    // sv.p already resolves to a manual price override when one is set (see scenarioCore) — reuse
+    // it directly so Final Unit Price / Revenue can never drift from what the tool itself computes.
+    const overrideRaw=OV.prices[u.id]!==undefined?+OV.prices[u.id].toFixed(4):'';
+    const finalUnitPrice=sv.p;
+    // Shared with the live dashboard and every other export sheet — projectScenUC applies Pop(t)
+    // (compounding at Population Growth %/yr) × A × AR(t) × E, capped at that year's Digital ID
+    // holder population, then × Final Unit Price.
+    const popArr=YEARS.map((_,t)=>popAtYear(t,somParams));
+    const{vols,revs}=projectScenUC(sv,somParams);
+    return[
+      u.s,u.id,getDesc(u),
+      meta.oa||'—',meta.oc||'—',meta.ac||'—',meta.ie||'—',meta.de||'—',meta.po||'—',meta.ag||'—',
+      yn2(ekycFlag),yn2(ciFlag),yn2(cvFlag),yn2(authFlag),yn2(payFlag),tier,'',
+      yn2(ci_l0),yn2(ci_l1),yn2(ci_l2),yn2(ci_l3),yn2(au_l0),yn2(au_l1),yn2(au_l2),yn2(au_l3),
+      n4(ekycRate),n4(ciBaseRate),n4(cvRate),n4(authBaseRate),ciL1Adn,ciL2Adn,ciL3Adn,auL1Adn,auL2Adn,auL3Adn,payRate,
+      baseTotal,loaTotal,n4(payFeeApplied),unitP,overrideRaw,+finalUnitPrice.toFixed(4),
+      meta.rd||'—',meta.rs||'—',meta.cs!==undefined?meta.cs:'—',meta.md||'—',
+      somScenPop,n5(somPopGr),n5(sv.A),n4(sv.E),
+      ...popArr.map(v=>+v.toFixed(1)),
+      ...sv.ar.map(v=>+v.toFixed(5)),
+      ...vols.map(v=>+v.toFixed(1)),
+      ...revs.map(v=>+v.toFixed(2)),
+      n5(somAge),
+      ...somEnrArr.map(v=>+v.toFixed(5)),
+      isEnabled(u.id)?1:0,
+    ];
   });
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([
-    ['OmniTrust Somalia — InputC_SOM — Baseline · Paste into SOM sheet Cols 38, 44, 45, 46-55'],
-    ['A (Apply) = client P_val. AR values are fractions (not %).'],
-    [''],icHdr1,...icRows
-  ]),'InputC_SOM');
+  const ws_SOM=XLSX.utils.aoa_to_sheet([
+    ['OmniTrust Somalia — SOM — rate-card build-up modeled on the master model\'s country revenue tabs · Baseline values'],
+    ['Base/LoA/Pay/Unit price, Population, Volume, and Revenue are live formulas (see cell contents) driven by the flag/rate-card/growth columns. AR, Age-Eligible %, and Enrollment values are fractions (not %). Volume V(u,y) = MIN(Pop(t)×A×AR(t)×E, Digital ID holders(t)×E), where Digital ID holders(t) = Pop(t)×Age-Eligible%×Enrollment(t) — a use case\'s users can never exceed how many people actually hold a digital ID that year.'],
+    [''],somGroupHdr,somHdr,...somRows
+  ]);
+  // Wire up live formulas: overwrite the .f (formula) on cells whose cached .v was already
+  // computed above, so opening in Excel shows correct numbers immediately AND lets you audit/edit
+  // the build-up (mirrors the master model's own SUMPRODUCT/IF rate-card formulas, spelled out
+  // per component for readability).
+  {
+    const cl=XLSX.utils.encode_col;
+    const HDR_ROWS=5; // title, subtitle, blank, group header, column header
+    const C={ekyc:10,ci:11,cv:12,auth:13,pay:14,
+      ciL1:18,ciL2:19,ciL3:20,auL1:22,auL2:23,auL3:24,
+      ekycRate:25,ciBaseRate:26,cvRate:27,authBaseRate:28,
+      ciL1Adn:29,ciL2Adn:30,ciL3Adn:31,auL1Adn:32,auL2Adn:33,auL3Adn:34,payRate:35,
+      baseTot:36,loaTot:37,payFeeC:38,unitP:39,ovr:40,finalP:41,
+      p:46,popgr:47,a:48,e:49,pop0:50,ar0:60,v0:70,r0:80,age:90,enr0:91};
+    somRows.forEach((_,i)=>{
+      const r=HDR_ROWS+1+i;
+      const ref=c=>cl(c)+r;
+      const addF=(c,f)=>{ if(ws_SOM[ref(c)]) ws_SOM[ref(c)].f=f; };
+      addF(C.baseTot, `IF(${ref(C.ekyc)}="Yes",${ref(C.ekycRate)},0)+IF(${ref(C.ci)}="Yes",${ref(C.ciBaseRate)},0)+IF(${ref(C.cv)}="Yes",${ref(C.cvRate)},0)+IF(${ref(C.auth)}="Yes",${ref(C.authBaseRate)},0)`);
+      addF(C.loaTot, `IF(${ref(C.ciL1)}="Yes",${ref(C.ciL1Adn)},0)+IF(${ref(C.ciL2)}="Yes",${ref(C.ciL2Adn)},0)+IF(${ref(C.ciL3)}="Yes",${ref(C.ciL3Adn)},0)+IF(${ref(C.auL1)}="Yes",${ref(C.auL1Adn)},0)+IF(${ref(C.auL2)}="Yes",${ref(C.auL2Adn)},0)+IF(${ref(C.auL3)}="Yes",${ref(C.auL3Adn)},0)`);
+      addF(C.payFeeC, `IF(${ref(C.pay)}="Yes",${ref(C.payRate)},0)`);
+      addF(C.unitP, `${ref(C.baseTot)}+${ref(C.loaTot)}+${ref(C.payFeeC)}`);
+      addF(C.finalP, `IF(${ref(C.ovr)}<>"",${ref(C.ovr)},${ref(C.unitP)})`);
+      // Population(t): Year 1 = P; each subsequent year compounds the previous year's cell by
+      // (1 + Population Growth %/yr) — a simple chained formula, fully auditable year to year.
+      addF(C.pop0, `${ref(C.p)}`);
+      for(let t=1;t<YEARS.length;t++){
+        addF(C.pop0+t, `${ref(C.pop0+t-1)}*(1+${ref(C.popgr)})`);
+      }
+      // Volume is capped at that year's Digital ID holder population (Pop(t)×Age%×Enrollment(t)) —
+      // a use case's users can never exceed how many people actually hold a digital ID, but the cap
+      // only binds where uncapped demand would exceed it (see the DIGITAL ID CAP INPUTS columns).
+      for(let t=0;t<YEARS.length;t++){
+        addF(C.v0+t, `MIN(${ref(C.pop0+t)}*${ref(C.a)}*${ref(C.ar0+t)}*${ref(C.e)},${ref(C.pop0+t)}*${ref(C.age)}*${ref(C.enr0+t)}*${ref(C.e)})`);
+        addF(C.r0+t, `${ref(C.v0+t)}*${ref(C.finalP)}`);
+      }
+    });
+  }
+  XLSX.utils.book_append_sheet(wb,ws_SOM,'SOM');
 
   // ── Sheet 3: Input_Overrides ─────────────────────────────────────────────
   // Since the Excel export is now the only thing that leaves this tool (per the "share the
@@ -2039,11 +2232,11 @@ function exportXLSX(){
 
   // ── Sheet 4: Output_Baseline ─────────────────────────────────────────────
   {
-    const scenPop=getScenarioParams('baseline').pop;
+    const scenParams=getScenarioParams('baseline');
+    const scenPop=scenParams.pop;
     const rows=UC.map(u=>{
       const sv=getScenValues(u,rates);
-      const {revs}=projectScenUC(sv.baseline,scenPop);
-      const vols=sv.baseline.ar.map(arY=>scenPop*sv.baseline.A*arY*sv.baseline.E);
+      const {vols,revs}=projectScenUC(sv.baseline,scenParams);
       const totV=vols.reduce((a,b)=>a+b,0);
       const totR=revs.reduce((a,b)=>a+b,0);
       return[u.s,u.id,getDesc(u),isEnabled(u.id)?1:0,
@@ -2075,12 +2268,12 @@ function exportXLSX(){
     ['Metric','Unit',...YEARS,'10yr Total'],
   ];
   {
-    const scenPop=getScenarioParams('baseline').pop;
+    const scenParams=getScenarioParams('baseline');
     const activeUCs=UC.filter(u=>isEnabled(u.id));
     const yrR=YEARS.map((_,t)=>
-      activeUCs.reduce((s,u)=>{ const sv=getScenValues(u,rates); return s+projectScenUC(sv.baseline,scenPop).revs[t]; },0));
+      activeUCs.reduce((s,u)=>{ const sv=getScenValues(u,rates); return s+projectScenUC(sv.baseline,scenParams).revs[t]; },0));
     const yrV=YEARS.map((_,t)=>
-      activeUCs.reduce((s,u)=>{ const sv=getScenValues(u,rates); const vols=sv.baseline.ar.map(arY=>scenPop*sv.baseline.A*arY*sv.baseline.E); return s+vols[t]; },0));
+      activeUCs.reduce((s,u)=>{ const sv=getScenValues(u,rates); return s+projectScenUC(sv.baseline,scenParams).vols[t]; },0));
     ysRows.push(
       ['OT Revenue','USD',...yrR.map(v=>+v.toFixed(0)),+yrR.reduce((a,b)=>a+b,0).toFixed(0)],
       ['Events','count',...yrV.map(v=>+v.toFixed(0)),+yrV.reduce((a,b)=>a+b,0).toFixed(0)],
@@ -2453,7 +2646,7 @@ function getScenarioParams(scenario){
   const preset=SCEN_PRESET[scenario];
   if(!preset || !preset.popOv || !preset.popOv.on) return live;
   return{
-    pop:preset.popOv.pop, age:preset.popOv.age/100,
+    pop:preset.popOv.pop, popgr:live.popgr, age:preset.popOv.age/100,
     enr1:preset.popOv.enr1/100, enrt:preset.popOv.enrt/100,
     enrs:preset.popOv.enrs, spv:live.spv,
   };
@@ -2473,10 +2666,18 @@ function getScenValues(uc, rates){
   return{ conservative:mk('conservative'), baseline:mk('baseline'), optimistic:mk('optimistic') };
 }
 
-function projectScenUC(sv, pop){
-  // V = pop × A × AR[y] × E  (SOM sheet formula, static enrollment baked into A)
-  const revs=sv.ar.map(arY=>pop*sv.A*arY*sv.E*sv.p);
-  return{ revs, tot10:revs.reduce((a,b)=>a+b,0) };
+function projectScenUC(sv, params){
+  // Matches projectUC's row math exactly: V(u,y) = Pop(t) × A × AR(y) × E, capped at that year's
+  // Digital ID holder population (Pop(t) × Age-Eligible% × Enrollment(t)) — same idCap logic as the
+  // live dashboard, so every export/summary sheet and comparison card stays consistent with it.
+  const vols=YEARS.map((_,t)=>{
+    const popT=popAtYear(t,params);
+    const usersUncapped=popT*sv.A*sv.ar[t];
+    const idCap=popT*params.age*enrollment(t,params);
+    return Math.min(usersUncapped,idCap)*sv.E;
+  });
+  const revs=vols.map(v=>v*sv.p);
+  return{ vols, revs, tot10:revs.reduce((a,b)=>a+b,0) };
 }
 
 // Sets the Volume tab's Custom vs Scenario-Presets mode. Custom (default) ignores scenario presets
@@ -2505,7 +2706,7 @@ function renderScenStrip(){
     const p=getScenarioParams(k);
     UC.filter(u=>isEnabled(u.id)&&ucInScenarioSubset(u.id,k)).forEach(u=>{
       const sv=getScenValues(u,rates);
-      totals[k]+=projectScenUC(sv[k],p.pop).tot10;
+      totals[k]+=projectScenUC(sv[k],p).tot10;
     });
   });
   const mode=scenarioMode;
@@ -2768,7 +2969,7 @@ function presetScenTotal(key){
   let tot=0;
   UC.filter(u=>isEnabled(u.id)&&ucInScenarioSubset(u.id,key)).forEach(u=>{
     const sv=getScenValues(u,rates);
-    tot+=projectScenUC(sv[key],params.pop).tot10;
+    tot+=projectScenUC(sv[key],params).tot10;
   });
   return tot;
 }
