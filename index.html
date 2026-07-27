@@ -414,9 +414,8 @@ for(var p=0,v=0;p!==c.length;++p)if((v=c.charCodeAt(p))===n||v===i||v===34||f.fo
   </div>
   <div class="hdr-actions">
     <button class="hdr-btn" onclick="resetForm()" title="Reset all overrides to suggested values">↺ Reset</button>
-    <button class="hdr-btn" onclick="importJSON()" title="Load a saved JSON session">📂 Load JSON</button>
-    <button class="hdr-btn" onclick="exportJSON()" title="Save current inputs to JSON">💾 Save JSON</button>
-    <button class="hdr-btn primary" onclick="exportXLSX()" title="Export multi-sheet XLSX for Excel model plug-in">📊 Export XLSX</button>
+    <button class="hdr-btn page-save" onclick="downloadPage()" title="Save your session as a file so you can close this tab and pick up exactly where you left off later — this is for YOUR own use, not for sharing results with others">💾 Save Session</button>
+    <button class="hdr-btn primary" onclick="exportXLSX()" title="Export the multi-sheet XLSX workbook — this is the file to share with others; it documents every price/volume input you've adjusted">📊 Export XLSX (share this)</button>
     <button class="hdr-btn" onclick="exportCSV_legacy()" title="Export as single-sheet CSV">↓ CSV</button>
   </div>
 </header>
@@ -905,10 +904,17 @@ for(var p=0,v=0;p!==c.length;++p)if((v=c.charCodeAt(p))===n||v===i||v===34||f.fo
   <div id="scen-presets-root"></div>
 </div>
 
-<input type="file" id="import-file" accept=".json" style="display:none" onchange="loadFromFile(event)">
 
 <script>
 'use strict';
+
+// Snapshot of this exact document's markup, captured before any of our own JS below runs (i.e.
+// the untouched page as authored/served). Used by downloadPage() as the template for a shareable
+// standalone HTML file — we never re-capture this later, since later capture would reflect
+// serialized *attributes* rather than the user's live input values, which is not reliable for
+// <input>/<select> state. Instead, the live state is carried separately via buildSaveData() and
+// injected as a small autoload script (see downloadPage()).
+const PRISTINE_HTML = document.documentElement.outerHTML;
 
 // Escape a string for safe use inside an HTML attribute (e.g. an input's value="...").
 function escAttr(s){
@@ -1925,7 +1931,78 @@ function exportXLSX(){
     [''],icHdr1,...icRows
   ]),'InputC_SOM');
 
-  // ── Sheet 3: Output_Baseline ─────────────────────────────────────────────
+  // ── Sheet 3: Input_Overrides ─────────────────────────────────────────────
+  // Since the Excel export is now the only thing that leaves this tool (per the "share the
+  // Excel only" workflow), this sheet is the audit trail: for every use case, what's the shipped
+  // default ("Base") vs what was actually used to build the numbers in this workbook ("Final"),
+  // and — for price specifically — WHY it moved (a direct manual entry vs a service tier/LoA or
+  // Pattern change, which recomputes the suggested price on its own).
+  {
+    const yn=v=>v?'Y':'N';
+    const ovHdr=[
+      'Sector','UC-Code','Use Case','Enabled',
+      'Pattern (effective)','Pattern Overridden',
+      'Service Tier / LoA Adjusted',
+      'Base Price (USD)','Final Price (USD)','Price Overridden','Price Change Driver',
+      'Base P (Applicability)','Final P (Applicability)','P Overridden',
+      'Base E (events/yr)','Final E (events/yr)','E Overridden',
+      'Ramp Shape','Base Yr-1 Adoption (%)','Final Yr-1 Adoption (%)','Yr-1 Overridden',
+      'Description Overridden','Any Override',
+    ];
+    const ovRows=UC.map(u=>{
+      const effSvcs=getUCSvcs(u);
+      const basePrice=sugPrice(u.svcs,rates);           // default tiers, no pattern reshape
+      const sugFinalPrice=sugPrice(effSvcs,rates);      // current tiers/pattern, before a manual $ override
+      const finalPrice=OV.prices[u.id]!==undefined?OV.prices[u.id]:sugFinalPrice;
+      const priceOverridden=Math.abs(finalPrice-basePrice)>0.0001;
+      let priceDriver='None';
+      if(OV.prices[u.id]!==undefined) priceDriver='Manual override';
+      else if(Math.abs(sugFinalPrice-basePrice)>0.0001) priceDriver='LoA/tier or Pattern change';
+
+      const patOverridden=!!OV.pattern[u.id];
+      const svcOverridden=!!OV.svcs[u.id];
+
+      const baseP=sugP(u);
+      const finalP=getOv(OV.P,u.id,baseP);
+      const pOverridden=Math.abs(finalP-baseP)>0.0001;
+
+      const baseE=sugE(u);
+      const finalE=getOv(OV.E,u.id,baseE);
+      const eOverridden=Math.abs(finalE-baseE)>0.0001;
+
+      const rampShapeKey=OV.rampShape[u.id]||'standard';
+      const baseYr1=OV.AR[0];             // shared grid's own Year-1 cell — the true shipped default
+      const finalYr1=getOv(OV.A,u.id,sugA(u));
+      const yr1Overridden=Math.abs(finalYr1-baseYr1)>0.0001 || rampShapeKey!=='standard';
+
+      const descOverridden=OV.desc[u.id]!==undefined && OV.desc[u.id]!=='' && OV.desc[u.id]!==u.n;
+
+      const anyOverride=patOverridden||svcOverridden||priceOverridden||pOverridden||eOverridden||yr1Overridden||descOverridden||!isEnabled(u.id);
+
+      return[
+        u.s,u.id,getDesc(u),isEnabled(u.id)?1:0,
+        PAT_LABEL[getPat(effSvcs,u.id)],yn(patOverridden),
+        yn(svcOverridden),
+        n4(basePrice),n4(finalPrice),yn(priceOverridden),priceDriver,
+        n5(baseP),n5(finalP),yn(pOverridden),
+        n4(baseE),n4(finalE),yn(eOverridden),
+        RAMP_SHAPES[rampShapeKey].lbl,
+        +baseYr1.toFixed(2),+finalYr1.toFixed(2),yn(yr1Overridden),
+        yn(descOverridden),yn(anyOverride),
+      ];
+    });
+    const touchedCount=ovRows.filter(r=>r[r.length-1]==='Y').length;
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([
+      ['OmniTrust Somalia — Input Overrides Audit'],
+      [`${touchedCount} of ${UC.length} use cases have at least one input adjusted from its default/suggested value (or are disabled).`],
+      ['"Base" = the shipped default (no service tier/LoA or Pattern change). "Final" = what this workbook’s numbers actually use.'],
+      ['P = Applicability fraction of population. AR/Adoption values are already percentages (e.g. 2.0 = 2%), matching the Volumes tab.'],
+      [''],
+      ovHdr,...ovRows,
+    ]),'Input_Overrides');
+  }
+
+  // ── Sheet 4: Output_Baseline ─────────────────────────────────────────────
   {
     const scenPop=getScenarioParams('baseline').pop;
     const rows=UC.map(u=>{
@@ -1957,7 +2034,7 @@ function exportXLSX(){
     ]),'Output_Baseline');
   }
 
-  // ── Sheet 4: Year_Summary ────────────────────────────────────────────────
+  // ── Sheet 5: Year_Summary ────────────────────────────────────────────────
   const ysRows=[
     ['OmniTrust Somalia — Baseline Year Summary'],[''],
     ['Metric','Unit',...YEARS,'10yr Total'],
@@ -1977,7 +2054,7 @@ function exportXLSX(){
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(ysRows),'Year_Summary');
 
 
-  // ── Sheet 5: Platform_Participation ──────────────────────────────────────
+  // ── Sheet 6: Platform_Participation ──────────────────────────────────────
   const platData=calcPlatRevByYear();
   const platHdr=['Institution','Sector','Category','Tier','Annual Fee (USD)','Start Year',
     ...PLAT_YEARS.map(y=>`Rev_${y}`),'10yr Total'];
@@ -2008,18 +2085,24 @@ function exportCSV_legacy(){
   const ts=exportTimestamp();
   let csv='Somalia Partner Data — OmniTrust DPI\n';
   csv+=`Generated,${ts.display}\n\n`;
-  csv+='UC Code,Use Case,Sector,Pattern,Enabled,P%,E/yr,A_frac,Unit_Price(p_u),';
+  csv+='UC Code,Use Case,Sector,Pattern,Enabled,P%,E/yr,A_frac,Base_Unit_Price,Final_Unit_Price,Price_Overridden,Any_Override,';
   csv+=YEARS.map(y=>'V_'+y).join(',')+','+YEARS.map(y=>'R_'+y).join(',')+',10yr_OT_Total\n';
   proj.sort((a,b)=>b.totRev-a.totRev).forEach(({uc,rows,totRev})=>{
     const en=isEnabled(uc.id)?1:0;
+    const effSvcs=getUCSvcs(uc);
     const P_val=(getOv(OV.P,uc.id,sugP(uc))*100).toFixed(1);
     const E_val=getOv(OV.E,uc.id,sugE(uc)).toFixed(2);
     const A_frac=getOv(OV.P,uc.id,sugP(uc)).toFixed(4);
-    const sug=sugPrice(uc.svcs,rates);
-    const pr=OV.prices[uc.id]!==undefined?OV.prices[uc.id]:sug;
+    const basePrice=sugPrice(uc.svcs,rates);               // shipped default tiers, no pattern reshape
+    const sugFinalPrice=sugPrice(effSvcs,rates);           // current tiers/pattern, before a manual $ entry
+    const pr=OV.prices[uc.id]!==undefined?OV.prices[uc.id]:sugFinalPrice;
+    const priceOverridden=Math.abs(pr-basePrice)>0.0001;
+    const anyOverride=priceOverridden||!!OV.pattern[uc.id]||!!OV.svcs[uc.id]||!!OV.rampShape[uc.id]
+      ||OV.P[uc.id]!==undefined||OV.E[uc.id]!==undefined||OV.A[uc.id]!==undefined
+      ||(OV.desc[uc.id]!==undefined&&OV.desc[uc.id]!==''&&OV.desc[uc.id]!==uc.n)||!en;
     const vols=rows.map(r=>r.events.toFixed(0));
     const revs=rows.map(r=>r.rev.toFixed(2));
-    csv+=`"${uc.id}","${getDesc(uc).replace(/"/g,'""')}","${uc.s}","${PAT_LABEL[getPat(uc.svcs,uc.id)]}",${en},${P_val},${E_val},${A_frac},${pr.toFixed(4)},${vols.join(',')},${revs.join(',')},${totRev.toFixed(2)}\n`;
+    csv+=`"${uc.id}","${getDesc(uc).replace(/"/g,'""')}","${uc.s}","${PAT_LABEL[getPat(effSvcs,uc.id)]}",${en},${P_val},${E_val},${A_frac},${basePrice.toFixed(4)},${pr.toFixed(4)},${priceOverridden?'Y':'N'},${anyOverride?'Y':'N'},${vols.join(',')},${revs.join(',')},${totRev.toFixed(2)}\n`;
   });
   const blob=new Blob([csv],{type:'text/csv'});
   const a=document.createElement('a');
@@ -2081,6 +2164,9 @@ function applySaveData(d){
     rebuildSecNavs();
   }
 }
+// Retained internally (no longer exposed in the toolbar — superseded by downloadPage(), which
+// packages the same session data into a shareable, self-opening HTML snapshot). Kept for raw
+// JSON round-tripping / test coverage of the save-data schema.
 function exportJSON(){
   const data=buildSaveData();
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
@@ -2090,10 +2176,56 @@ function exportJSON(){
   a.click();
   unsaved=false;updateUnsavedDot();
   clearAutosave(); // it's now safely saved to a real file — the recovery buffer is redundant
-  const btn=document.querySelector('.hdr-btn.primary');
-  if(btn){btn.textContent='✓ Saved';setTimeout(()=>btn.textContent='💾 Save JSON',2000);}
 }
-function importJSON(){document.getElementById('import-file').click();}
+function importJSON(){const el=document.getElementById('import-file'); if(el) el.click();}
+
+// ── Save Session — a self-contained, self-loading HTML snapshot ──────────────────
+// Packages the current session (same payload as buildSaveData()) into a full copy of this
+// tool's own page (captured pristine at load, see PRISTINE_HTML above). Opening the downloaded
+// file in any browser re-runs the whole tool from scratch and then auto-applies the embedded
+// data — no separate "load" step, no JSON file to keep track of. This is purely a personal
+// save/resume mechanism (close the tab now, reopen this file later to continue exactly where you
+// left off) — it is NOT the artifact meant to be shared with other people. When the tool is
+// hosted from a shared/public link (e.g. GitHub Pages), everyone works from their own saved
+// session file; the only thing meant to go back out to others is the XLSX export below, which
+// documents every adjusted input so a reviewer doesn't need this tool at all to understand them.
+function downloadPage(){
+  if(!PRISTINE_HTML){
+    alert('Could not prepare the page for download — please reload the tool and try again.');
+    return;
+  }
+  const ts=exportTimestamp();
+  const data=buildSaveData();
+  // Escape every "<" so a stray script-closing sequence (e.g. inside a custom use-case
+  // description) can't break out of the injected tag below. < is a valid escape inside
+  // the JSON string literals that make up most of this payload, so this is safe wherever it lands.
+  const payload=JSON.stringify(data).replace(/</g,'\\u003c');
+  // NB: the closing tags below have their slash escaped (backslash before "/") — this text lives
+  // inside OUR OWN script element in the .html source, and the HTML parser matches a literal
+  // closing-tag sequence regardless of JS string/template context. An escaped slash keeps the JS
+  // string value identical while stopping the parser from prematurely closing this very tag when
+  // the page is loaded.
+  const autoloadTag=`<script>window.__OMNITRUST_AUTOLOAD__=${payload};<\/script>\n`;
+  let out=PRISTINE_HTML;
+  // Insert right after the opening <html> tag — i.e. BEFORE the big app script further down —
+  // so window.__OMNITRUST_AUTOLOAD__ already exists by the time that script's own init code
+  // checks for it. (Inserting near the end of <body> instead would run too late: scripts execute
+  // in document order, and the app script's init code would already have finished by then.)
+  // Anchored to the very start of the string (documentElement.outerHTML always begins with the
+  // <html> tag) so this can't accidentally match a look-alike sequence buried in the vendored
+  // SheetJS library's own source further down the document.
+  out = /^<html[^>]*>/.test(out) ? out.replace(/^(<html[^>]*>)/,'$1'+autoloadTag) : autoloadTag+out;
+  out = '<!DOCTYPE html>\n'+out;
+  const blob=new Blob([out],{type:'text/html'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`OmniTrust_Somalia_Page_${ts.file}.html`;
+  a.click();
+  unsaved=false;updateUnsavedDot();
+  clearAutosave(); // it's now safely captured in a shareable page — the recovery buffer is redundant
+  const btn=document.querySelector('.hdr-btn.page-save');
+  if(btn){const orig=btn.textContent;btn.textContent='✓ Saved';setTimeout(()=>btn.textContent=orig,2000);}
+}
 function loadFromFile(evt){
   const f=evt.target.files[0];if(!f)return;
   const r=new FileReader();
@@ -2143,7 +2275,7 @@ function restoreAutosave(){
     renderPriceTbl();recalc();renderScenPresetsTab();
     markUnsaved(); // recovered state still isn't saved to a file yet
     const el=document.getElementById('recovery-banner'); if(el) el.remove();
-    alert('✓ Restored your unsaved work from '+new Date(parsed.savedAt).toLocaleString()+'. Remember to Save JSON when you\'re done.');
+    alert('✓ Restored your unsaved work from '+new Date(parsed.savedAt).toLocaleString()+'. Remember to use 💾 Save Session when you\'re done for today.');
   }catch(ex){ alert('Could not restore the autosave: '+ex.message); dismissRecoveryBanner(); }
 }
 function checkForRecoverableAutosave(){
@@ -2176,16 +2308,23 @@ function exportCSV(){
   const ts=exportTimestamp();
   let csv='Somalia Partner Data — OmniTrust DPI\n';
   csv+=`Generated,${ts.display}\nTotal Pop,${params.pop}\n\n`;
-  csv+='UC Code,Use Case,Sector,Pattern,P%,E/yr,AR Y1%,Unit Price,';
+  csv+='UC Code,Use Case,Sector,Pattern,Enabled,P%,E/yr,AR Y1%,Base Unit Price,Final Unit Price,Price Overridden,Any Override,';
   csv+=YEARS.join(',')+',10yr Total\n';
   proj.sort((a,b)=>b.totRev-a.totRev).forEach(({uc,rows,totRev})=>{
+    const en=isEnabled(uc.id)?1:0;
+    const effSvcs=getUCSvcs(uc);
     const P_val=(getOv(OV.P,uc.id,sugP(uc))*100).toFixed(1);
     const E_val=getOv(OV.E,uc.id,sugE(uc)).toFixed(2);
     const ar0=getOv(OV.A,uc.id,sugA(uc)).toFixed(1);
-    const sug=sugPrice(uc.svcs,rates);
-    const pr=OV.prices[uc.id]!==undefined?OV.prices[uc.id]:sug;
+    const basePrice=sugPrice(uc.svcs,rates);              // shipped default tiers, no pattern reshape
+    const sugFinalPrice=sugPrice(effSvcs,rates);          // current tiers/pattern, before a manual $ entry
+    const pr=OV.prices[uc.id]!==undefined?OV.prices[uc.id]:sugFinalPrice;
+    const priceOverridden=Math.abs(pr-basePrice)>0.0001;
+    const anyOverride=priceOverridden||!!OV.pattern[uc.id]||!!OV.svcs[uc.id]||!!OV.rampShape[uc.id]
+      ||OV.P[uc.id]!==undefined||OV.E[uc.id]!==undefined||OV.A[uc.id]!==undefined
+      ||(OV.desc[uc.id]!==undefined&&OV.desc[uc.id]!==''&&OV.desc[uc.id]!==uc.n)||!en;
     const revs=rows.map(r=>r.rev.toFixed(2));
-    csv+=`"${uc.id}","${getDesc(uc).replace(/"/g,'""')}","${uc.s}","${PAT_LABEL[getPat(uc.svcs,uc.id)]}",${P_val},${E_val},${ar0},${pr.toFixed(3)},${revs.join(',')},${totRev.toFixed(2)}\n`;
+    csv+=`"${uc.id}","${getDesc(uc).replace(/"/g,'""')}","${uc.s}","${PAT_LABEL[getPat(effSvcs,uc.id)]}",${en},${P_val},${E_val},${ar0},${basePrice.toFixed(3)},${pr.toFixed(3)},${priceOverridden?'Y':'N'},${anyOverride?'Y':'N'},${revs.join(',')},${totRev.toFixed(2)}\n`;
   });
   const blob=new Blob([csv],{type:'text/csv'});
   const a=document.createElement('a');
@@ -2768,7 +2907,19 @@ buildARGrid();
 renderPriceTbl();
 recalc();
 updateCounts();
-checkForRecoverableAutosave();
+// A file downloaded via "💾 Save Session" carries its saved session embedded as
+// window.__OMNITRUST_AUTOLOAD__ — apply it automatically so the page opens already filled in,
+// exactly as it was when downloaded. This takes priority over the (browser-local) autosave
+// recovery banner, since it represents a deliberate, complete save rather than a crash buffer.
+if(window.__OMNITRUST_AUTOLOAD__){
+  try{
+    applySaveData(window.__OMNITRUST_AUTOLOAD__);
+    renderPriceTbl();recalc();renderScenPresetsTab();
+    unsaved=false;updateUnsavedDot();
+  }catch(e){ console.error('Failed to auto-load the embedded page data:', e); }
+}else{
+  checkForRecoverableAutosave();
+}
 </script>
 </body>
 </html>
