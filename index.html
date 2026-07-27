@@ -241,6 +241,12 @@ select.ramp-sel.ramp-changed{border-color:var(--orange);background:var(--orange-
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .saved-ok{color:var(--green);font-size:10px;font-weight:600;margin-left:6px}
 
+/* Autosave recovery banner */
+.recovery-banner{position:sticky;top:0;z-index:200;display:flex;align-items:center;gap:12px;
+  padding:9px 16px;background:#FEF3C7;border-bottom:2px solid var(--orange);
+  font-size:11.5px;color:#7A4A00}
+.recovery-banner button{font-size:10.5px;padding:4px 10px}
+
 /* Sector nav */
 .sec-nav{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}
 .sec-nav-btn{font-size:10px;padding:3px 9px;border-radius:100px;
@@ -2002,8 +2008,10 @@ function exportCSV_legacy(){
 }
 
 // ── Save / Load ───────────────────────────────────────────────────────────────
-function exportJSON(){
-  const data={meta:{country:'Somalia',date:new Date().toISOString().slice(0,10),version:'1.0'},
+// Single source of truth for "everything that makes up a saved session" — used by the JSON
+// download, the file-based import, and the local-storage autosave/recovery safety net below.
+function buildSaveData(){
+  return{meta:{country:'Somalia',date:new Date().toISOString().slice(0,10),version:'1.0'},
     globalRates:(()=>{const g=id=>+(document.getElementById(id)?.value)||0;
       return{eT1:g('sr-eT1'),eT2:g('sr-eT2'),
         aBase:g('sr-aBase'),aL1:g('sr-aL1'),aL2:g('sr-aL2'),aL3:g('sr-aL3'),
@@ -2020,12 +2028,47 @@ function exportJSON(){
     pattern:OV.pattern,desc:OV.desc,rampShape:OV.rampShape,activeScenario,scenarioMode,
     customUC:UC.filter(u=>u.custom),
     scenPreset:SCEN_PRESET};
+}
+// Applies a previously-built save payload (from a loaded file OR a recovered autosave) to the
+// live app state. Throws on malformed input — callers should wrap in try/catch.
+function applySaveData(d){
+  if(d.globalRates){
+    Object.entries(d.globalRates).forEach(([k,v])=>{const el=document.getElementById('sr-'+k);if(el)el.value=v;});
+  }
+  if(d.params){
+    Object.entries(d.params).forEach(([k,v])=>{const el=document.getElementById('p-'+k);if(el)el.value=v;});
+  }
+  if(d.AR){OV.AR=[...d.AR];buildARGrid();}
+  if(d.prices)OV.prices=d.prices;
+  if(d.P)OV.P=d.P;
+  if(d.E)OV.E=d.E;
+  if(d.A)OV.A=d.A;
+  if(d.enabled)OV.enabled=d.enabled;
+  if(d.svcs)OV.svcs=d.svcs;
+  if(d.pattern)OV.pattern=d.pattern;
+  if(d.desc)OV.desc=d.desc;
+  if(d.rampShape)OV.rampShape=d.rampShape;
+  if(d.activeScenario)activeScenario=d.activeScenario;
+  if(d.scenarioMode)scenarioMode=d.scenarioMode;
+  if(d.scenPreset){
+    Object.keys(SCEN_PRESET).forEach(k=>{ if(d.scenPreset[k]) Object.assign(SCEN_PRESET[k],d.scenPreset[k]); });
+  }
+  if(d.customUC){
+    // remove any custom UCs already in memory, then restore the saved ones
+    for(let i=UC.length-1;i>=0;i--){ if(UC[i].custom) UC.splice(i,1); }
+    d.customUC.forEach(u=>UC.push(Object.assign({},u,{custom:true})));
+    rebuildSecNavs();
+  }
+}
+function exportJSON(){
+  const data=buildSaveData();
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
   a.download=`OmniTrust_Somalia_Input_${data.meta.date}.json`;
   a.click();
   unsaved=false;updateUnsavedDot();
+  clearAutosave(); // it's now safely saved to a real file — the recovery buffer is redundant
   const btn=document.querySelector('.hdr-btn.primary');
   if(btn){btn.textContent='✓ Saved';setTimeout(()=>btn.textContent='💾 Save JSON',2000);}
 }
@@ -2036,40 +2079,66 @@ function loadFromFile(evt){
   r.onload=e=>{
     try{
       const d=JSON.parse(e.target.result);
-      if(d.globalRates){
-        Object.entries(d.globalRates).forEach(([k,v])=>{const el=document.getElementById('sr-'+k);if(el)el.value=v;});
-      }
-      if(d.params){
-        Object.entries(d.params).forEach(([k,v])=>{const el=document.getElementById('p-'+k);if(el)el.value=v;});
-      }
-      if(d.AR){OV.AR=[...d.AR];buildARGrid();}
-      if(d.prices)OV.prices=d.prices;
-      if(d.P)OV.P=d.P;
-      if(d.E)OV.E=d.E;
-      if(d.A)OV.A=d.A;
-      if(d.enabled)OV.enabled=d.enabled;
-      if(d.svcs)OV.svcs=d.svcs;
-      if(d.pattern)OV.pattern=d.pattern;
-      if(d.desc)OV.desc=d.desc;
-      if(d.rampShape)OV.rampShape=d.rampShape;
-      if(d.activeScenario)activeScenario=d.activeScenario;
-      if(d.scenarioMode)scenarioMode=d.scenarioMode;
-      if(d.scenPreset){
-        Object.keys(SCEN_PRESET).forEach(k=>{ if(d.scenPreset[k]) Object.assign(SCEN_PRESET[k],d.scenPreset[k]); });
-      }
-      if(d.customUC){
-        // remove any custom UCs already in memory, then restore the saved ones
-        for(let i=UC.length-1;i>=0;i--){ if(UC[i].custom) UC.splice(i,1); }
-        d.customUC.forEach(u=>UC.push(Object.assign({},u,{custom:true})));
-        rebuildSecNavs();
-      }
-      renderPriceTbl();recalc();
+      applySaveData(d);
+      renderPriceTbl();recalc();renderScenPresetsTab();
       unsaved=false;updateUnsavedDot();
+      clearAutosave(); // freshly loaded from a real file — nothing stale left to recover
       alert('✓ Data loaded from '+f.name);
     }catch(ex){alert('Error loading file: '+ex.message);}
   };
   r.readAsText(f);
 }
+
+// ── Autosave / crash recovery (browser local storage only — never leaves the machine) ────────
+const AUTOSAVE_KEY='omnitrust_somalia_autosave_v1';
+function clearAutosave(){ try{ localStorage.removeItem(AUTOSAVE_KEY); }catch(e){} }
+function autosaveTick(){
+  if(!unsaved) return; // nothing new since the last save/load — don't bother
+  try{
+    localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({savedAt:Date.now(), data:buildSaveData()}));
+  }catch(e){ /* storage unavailable/full — fail silently, this is a best-effort safety net */ }
+}
+function showRecoveryBanner(savedAt){
+  if(document.getElementById('recovery-banner')) return;
+  const bar=document.createElement('div');
+  bar.id='recovery-banner';
+  bar.className='recovery-banner';
+  const when=new Date(savedAt).toLocaleString();
+  bar.innerHTML=`<span>⚠ Recovered unsaved work from <b>${when}</b> that was never saved to a file.</span>
+    <button class="sel-btn" style="background:var(--navy);color:#fff;border-color:var(--navy)" onclick="restoreAutosave()">Restore it</button>
+    <button class="sel-btn" onclick="dismissRecoveryBanner()">Discard</button>`;
+  document.body.prepend(bar);
+}
+function dismissRecoveryBanner(){
+  const el=document.getElementById('recovery-banner'); if(el) el.remove();
+  clearAutosave();
+}
+function restoreAutosave(){
+  let raw; try{ raw=localStorage.getItem(AUTOSAVE_KEY); }catch(e){ raw=null; }
+  if(!raw){ dismissRecoveryBanner(); return; }
+  try{
+    const parsed=JSON.parse(raw);
+    applySaveData(parsed.data);
+    renderPriceTbl();recalc();renderScenPresetsTab();
+    markUnsaved(); // recovered state still isn't saved to a file yet
+    const el=document.getElementById('recovery-banner'); if(el) el.remove();
+    alert('✓ Restored your unsaved work from '+new Date(parsed.savedAt).toLocaleString()+'. Remember to Save JSON when you\'re done.');
+  }catch(ex){ alert('Could not restore the autosave: '+ex.message); dismissRecoveryBanner(); }
+}
+function checkForRecoverableAutosave(){
+  let raw; try{ raw=localStorage.getItem(AUTOSAVE_KEY); }catch(e){ return; }
+  if(!raw) return;
+  let parsed; try{ parsed=JSON.parse(raw); }catch(e){ return; }
+  if(!parsed || !parsed.data) return;
+  showRecoveryBanner(parsed.savedAt);
+}
+window.addEventListener('beforeunload', function(e){
+  if(!unsaved) return;
+  e.preventDefault();
+  e.returnValue=''; // browsers show their own generic message; the text here is ignored
+  return '';
+});
+setInterval(autosaveTick, 30000);
 function resetForm(){
   if(!confirm('Reset all overrides to suggested values? This also resets the Scenario Presets to their defaults (custom-added use cases are kept).'))return;
   OV={prices:{},P:{},E:{},A:{},AR:[...SOM_AR_DEF],enabled:{},svcs:{},pattern:{},desc:{},rampShape:{}};
@@ -2078,6 +2147,7 @@ function resetForm(){
   SCEN_PRESET={conservative:freshPreset('conservative'),baseline:freshPreset('baseline'),optimistic:freshPreset('optimistic')};
   buildARGrid();renderPriceTbl();recalc();renderScenPresetsTab();
   unsaved=false;updateUnsavedDot();
+  clearAutosave();
 }
 function exportCSV(){
   const params=getParams();const rates=getRates();
@@ -2676,6 +2746,7 @@ buildARGrid();
 renderPriceTbl();
 recalc();
 updateCounts();
+checkForRecoverableAutosave();
 </script>
 </body>
 </html>
