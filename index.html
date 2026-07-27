@@ -1847,6 +1847,21 @@ function updateCounts(){
   document.querySelectorAll('[id^="inc-count-"]').forEach(el=>el.textContent=n+' / '+UC.length+' included');
 }
 
+// ── Shared export timestamp (date + time, for on-sheet display and filenames) ─────
+// display: human-readable date+time with timezone offset, e.g. "2026-07-25 14:32:07 (UTC+00:00)"
+// file: filename-safe date+time, e.g. "2026-07-25_1432"
+function exportTimestamp(){
+  const d=new Date();
+  const pad=n=>String(n).padStart(2,'0');
+  const off=-d.getTimezoneOffset();
+  const offSign=off>=0?'+':'-';
+  const offStr=`UTC${offSign}${pad(Math.floor(Math.abs(off)/60))}:${pad(Math.abs(off)%60)}`;
+  const display=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} `+
+    `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} (${offStr})`;
+  const file=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}`;
+  return{display,file};
+}
+
 // ── XLSX multi-sheet export ───────────────────────────────────────────────────
 function exportXLSX(){
   if(typeof XLSX==='undefined'){
@@ -1854,11 +1869,10 @@ function exportXLSX(){
     return;
   }
   const params=getParams(), rates=getRates();
-  const pop=params.pop, spv=params.spv;
+  const pop=params.pop;
   const wb=XLSX.utils.book_new();
   const YEARS=[2027,2028,2029,2030,2031,2032,2033,2034,2035,2036];
-  const SCENS=['conservative','baseline','optimistic'];
-  const SCEN_LABELS={conservative:'Conservative (L0)',baseline:'Baseline (L1)',optimistic:'Optimistic (L2)'};
+  const ts=exportTimestamp();
 
   // Helper: format number as aoa value
   const n4=v=>+v.toFixed(4);
@@ -1867,7 +1881,7 @@ function exportXLSX(){
   // ── Sheet 1: Country_Meta ────────────────────────────────────────────────
   const metaAoa=[
     ['OmniTrust DPI — Somalia Partner Input'],
-    ['Generated',new Date().toISOString().slice(0,10)],
+    ['Generated',ts.display],
     [''],
     ['PARAMETER','VALUE','NOTES'],
     ['Country','Somalia',''],
@@ -1878,122 +1892,93 @@ function exportXLSX(){
     ['Yr1 Enrollment %',+document.getElementById('p-enr1')?.value||18,'Digital ID coverage at model start'],
     ['Target Enrollment %',+document.getElementById('p-enrt')?.value||55,'Long-run enrollment'],
     ['Enrollment Ramp (yrs)',+document.getElementById('p-enrs')?.value||8,''],
-    ['TECH5-SA SPV %',Math.round(spv*100),'Suggestive — confirm per deal terms'],
     ['OTR eKYC T2 (USD)',rates.eT2,'Gov-set rate to relying parties'],
     ['eKYC T1 rate',rates.eT1,'ABIS + liveness + E&O cost floor'],
     ['Auth L1',rates.aL1,''],['CI L1',rates.cL1,''],['CV L1',rates.vL1,''],
     [''],
-    ['SCENARIO PRESETS (from the Scenario Presets tab)','',''],
-    ['Scenario','LoA shift','eKYC target','A (P) scale','E scale','Ramp shape','Y10 ceiling %','Use-case subset'],
-    ['Conservative',SCEN_PRESET.conservative.loaShift,SCEN_PRESET.conservative.ekycTarget,
-      '×'+SCEN_PRESET.conservative.pMult,'×'+SCEN_PRESET.conservative.eMult,
-      RAMP_SHAPES[SCEN_PRESET.conservative.rampShape].lbl,SCEN_PRESET.conservative.ceiling,
-      SCEN_PRESET.conservative.ucSubset.on?SCEN_PRESET.conservative.ucSubset.ids.length+' of '+UC.length+' use cases':'all enabled use cases'],
-    ['Baseline','—','—','client inputs','client inputs','client AR grid (+ per-UC overrides)','client AR grid',
-      SCEN_PRESET.baseline.ucSubset.on?SCEN_PRESET.baseline.ucSubset.ids.length+' of '+UC.length+' use cases':'all enabled use cases'],
-    ['Optimistic',SCEN_PRESET.optimistic.loaShift,SCEN_PRESET.optimistic.ekycTarget,
-      '×'+SCEN_PRESET.optimistic.pMult,'×'+SCEN_PRESET.optimistic.eMult,
-      RAMP_SHAPES[SCEN_PRESET.optimistic.rampShape].lbl,SCEN_PRESET.optimistic.ceiling,
-      SCEN_PRESET.optimistic.ucSubset.on?SCEN_PRESET.optimistic.ucSubset.ids.length+' of '+UC.length+' use cases':'all enabled use cases'],
+    ['This export reflects Baseline values only (Custom/Preset inputs from the Volumes tab).','',''],
     [''],
     ['SOM SHEET COLUMN MAPPING','',''],
-    ['Col 38  Unit p(u)','← InputC_SOM col E/H/K (per scenario)','Copy to SOM!AL7:AL170'],
-    ['Col 44  A (Apply)','← InputC_SOM col F/I/L (P_val)','Copy to SOM!AR7:AR170'],
-    ['Col 45  E (Freq)', '← InputC_SOM col G/J/M (E_val)','Copy to SOM!AS7:AS170'],
-    ['Cols 46–55 AR Yr1–10','← InputC_SOM cols O-X / Z-AI / AK-AT','Copy to SOM!AT7:BC170'],
+    ['Col 38  Unit p(u)','← InputC_SOM col E','Copy to SOM!AL7:AL170'],
+    ['Col 44  A (Apply)','← InputC_SOM col F (P_val)','Copy to SOM!AR7:AR170'],
+    ['Col 45  E (Freq)', '← InputC_SOM col G (E_val)','Copy to SOM!AS7:AS170'],
+    ['Cols 46–55 AR Yr1–10','← InputC_SOM cols H-Q','Copy to SOM!AT7:BC170'],
   ];
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(metaAoa),'Country_Meta');
 
   // ── Sheet 2: InputC_SOM ──────────────────────────────────────────────────
-  // One row per UC, 3 scenario blocks side by side
-  // Block = p(u) · A(apply) · E(freq) · AR_Yr1..10  → 13 cols each
+  // One row per UC, Baseline values only: p(u) · A(apply) · E(freq) · AR_Yr1..10
   const icHdr1=[
     'Sector','UC-Code','Use Case','Enabled (1=include)',
-    // Conservative block (cols E–Q)
-    '◄ CONSERVATIVE ►','p(u) USD\n(Col 38)','A (Apply)\n(Col 44)','E (Freq)\n(Col 45)',
+    'p(u) USD\n(Col 38)','A (Apply)\n(Col 44)','E (Freq)\n(Col 45)',
     ...YEARS.map((_,t)=>`AR_Yr${t+1}\n${2027+t}\n(Col ${46+t})`),
-    // Baseline block (cols R–AD)
-    '◄ BASELINE ►','p(u) USD','A (Apply)','E (Freq)',
-    ...YEARS.map((_,t)=>`AR_Yr${t+1}\n${2027+t}`),
-    // Optimistic block (cols AE–AQ)
-    '◄ OPTIMISTIC ►','p(u) USD','A (Apply)','E (Freq)',
-    ...YEARS.map((_,t)=>`AR_Yr${t+1}\n${2027+t}`),
   ];
   const icRows=UC.map(u=>{
     const en=isEnabled(u.id)?1:0;
     const sv=getScenValues(u,rates);
-    const mkBlock=s=>[
-      '',n4(sv[s].p),n5(sv[s].A),n4(sv[s].E),...sv[s].ar.map(v=>+v.toFixed(5))
-    ];
-    return[u.s,u.id,getDesc(u),en,...mkBlock('conservative'),...mkBlock('baseline'),...mkBlock('optimistic')];
+    const b=sv.baseline;
+    return[u.s,u.id,getDesc(u),en,n4(b.p),n5(b.A),n4(b.E),...b.ar.map(v=>+v.toFixed(5))];
   });
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([
-    ['OmniTrust Somalia — InputC_SOM — All 3 Scenarios · Paste into SOM sheet Cols 38, 44, 45, 46-55'],
-    ['A (Apply) = client P_val. Conservative A×0.60, Optimistic A×1.35. AR values are fractions (not %).'],
+    ['OmniTrust Somalia — InputC_SOM — Baseline · Paste into SOM sheet Cols 38, 44, 45, 46-55'],
+    ['A (Apply) = client P_val. AR values are fractions (not %).'],
     [''],icHdr1,...icRows
   ]),'InputC_SOM');
 
-  // ── Sheets 3–5: Output per scenario ─────────────────────────────────────
-  SCENS.forEach(scen=>{
-    const label=SCEN_LABELS[scen];
-    const scenPop=getScenarioParams(scen).pop; // preset may define its own population assumptions
+  // ── Sheet 3: Output_Baseline ─────────────────────────────────────────────
+  {
+    const scenPop=getScenarioParams('baseline').pop;
     const rows=UC.map(u=>{
       const sv=getScenValues(u,rates);
-      const {revs}=projectScenUC(sv[scen],scenPop);
-      const vols=sv[scen].ar.map(arY=>scenPop*sv[scen].A*arY*sv[scen].E);
+      const {revs}=projectScenUC(sv.baseline,scenPop);
+      const vols=sv.baseline.ar.map(arY=>scenPop*sv.baseline.A*arY*sv.baseline.E);
       const totV=vols.reduce((a,b)=>a+b,0);
       const totR=revs.reduce((a,b)=>a+b,0);
       return[u.s,u.id,getDesc(u),isEnabled(u.id)?1:0,
-        n4(sv[scen].p),n5(sv[scen].A),n4(sv[scen].E),
+        n4(sv.baseline.p),n5(sv.baseline.A),n4(sv.baseline.E),
         ...vols.map(v=>+v.toFixed(1)),...revs.map(v=>+v.toFixed(2)),
-        +totV.toFixed(0),+totR.toFixed(2),+(totR*spv).toFixed(2)];
-    }).sort((a,b)=>b[b.length-2]-a[b.length-2]);
+        +totV.toFixed(0),+totR.toFixed(2)];
+    }).sort((a,b)=>b[b.length-1]-a[b.length-1]);
     const hdr=['Sector','UC-Code','Use Case','Enabled',
       'p(u)','A (Apply)','E (Freq)',
       ...YEARS.map(y=>`V_${y} Events`),...YEARS.map(y=>`R_${y} USD`),
-      '10yr Events','10yr OT Rev','10yr T5 Rev'];
+      '10yr Events','10yr OT Rev'];
     // Summary row
     const activeRows=rows.filter(r=>r[3]===1);
     const sumR=['TOTAL (included UCs)','','','','','','',
       ...YEARS.map((_,t)=>+activeRows.reduce((s,r)=>s+r[7+t],0).toFixed(0)),
       ...YEARS.map((_,t)=>+activeRows.reduce((s,r)=>s+r[17+t],0).toFixed(2)),
       +activeRows.reduce((s,r)=>s+r[27],0).toFixed(0),
-      +activeRows.reduce((s,r)=>s+r[28],0).toFixed(2),
-      +activeRows.reduce((s,r)=>s+r[29],0).toFixed(2)];
-    const subsetNote=SCEN_PRESET[scen]?.ucSubset?.on?` · curated subset: ${SCEN_PRESET[scen].ucSubset.ids.length} use cases (others shown as $0)`:'';
+      +activeRows.reduce((s,r)=>s+r[28],0).toFixed(2)];
     XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([
-      [`OmniTrust Somalia — ${label}`],
-      [`Pop=${scenPop.toLocaleString()} · SPV ${Math.round(spv*100)}% · ${UC.filter(u=>isEnabled(u.id)).length} UCs included${subsetNote}`],
+      ['OmniTrust Somalia — Baseline'],
+      [`Pop=${scenPop.toLocaleString()} · ${UC.filter(u=>isEnabled(u.id)).length} UCs included`],
       [''],hdr,...rows,[''],sumR
-    ]),`Output_${scen.charAt(0).toUpperCase()+scen.slice(1)}`);
-  });
+    ]),'Output_Baseline');
+  }
 
-  // ── Sheet 6: Year_Summary ────────────────────────────────────────────────
+  // ── Sheet 4: Year_Summary ────────────────────────────────────────────────
   const ysRows=[
-    ['OmniTrust Somalia — 3-Scenario Year Summary'],[''],
-    ['Scenario','Metric','Unit',...YEARS,'10yr Total'],
+    ['OmniTrust Somalia — Baseline Year Summary'],[''],
+    ['Metric','Unit',...YEARS,'10yr Total'],
   ];
-  SCENS.forEach(scen=>{
-    const label=SCEN_LABELS[scen];
-    const scenPop=getScenarioParams(scen).pop;
+  {
+    const scenPop=getScenarioParams('baseline').pop;
     const activeUCs=UC.filter(u=>isEnabled(u.id));
     const yrR=YEARS.map((_,t)=>
-      activeUCs.reduce((s,u)=>{ const sv=getScenValues(u,rates); return s+projectScenUC(sv[scen],scenPop).revs[t]; },0));
+      activeUCs.reduce((s,u)=>{ const sv=getScenValues(u,rates); return s+projectScenUC(sv.baseline,scenPop).revs[t]; },0));
     const yrV=YEARS.map((_,t)=>
-      activeUCs.reduce((s,u)=>{ const sv=getScenValues(u,rates); const vols=sv[scen].ar.map(arY=>scenPop*sv[scen].A*arY*sv[scen].E); return s+vols[t]; },0));
+      activeUCs.reduce((s,u)=>{ const sv=getScenValues(u,rates); const vols=sv.baseline.ar.map(arY=>scenPop*sv.baseline.A*arY*sv.baseline.E); return s+vols[t]; },0));
     ysRows.push(
-      [label,'OT Revenue','USD',...yrR.map(v=>+v.toFixed(0)),+yrR.reduce((a,b)=>a+b,0).toFixed(0)],
-      [label,`T5 ${Math.round(spv*100)}% Revenue`,'USD',...yrR.map(v=>+(v*spv).toFixed(0)),+(yrR.reduce((a,b)=>a+b,0)*spv).toFixed(0)],
-      [label,'Events','count',...yrV.map(v=>+v.toFixed(0)),+yrV.reduce((a,b)=>a+b,0).toFixed(0)],
-      [''],
+      ['OT Revenue','USD',...yrR.map(v=>+v.toFixed(0)),+yrR.reduce((a,b)=>a+b,0).toFixed(0)],
+      ['Events','count',...yrV.map(v=>+v.toFixed(0)),+yrV.reduce((a,b)=>a+b,0).toFixed(0)],
     );
-  });
+  }
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(ysRows),'Year_Summary');
 
 
-  // ── Sheet 7: Platform_Participation ──────────────────────────────────────
+  // ── Sheet 5: Platform_Participation ──────────────────────────────────────
   const platData=calcPlatRevByYear();
-  const platSpv=params.spv;
   const platHdr=['Institution','Sector','Category','Tier','Annual Fee (USD)','Start Year',
     ...PLAT_YEARS.map(y=>`Rev_${y}`),'10yr Total'];
   const platRows=INSTITUTIONS.map(inst=>{
@@ -2003,30 +1988,28 @@ function exportXLSX(){
   });
   const platSumRow=['TOTAL','','','','','',
     ...PLAT_YEARS.map((_,i)=>platData[i].total),platData.reduce((s,d)=>s+d.total,0)];
-  const platT5Row=[`T5 ${Math.round(platSpv*100)}% SPV`,'','','','','',
-    ...PLAT_YEARS.map((_,i)=>+(platData[i].total*platSpv).toFixed(0)),
-    +(platData.reduce((s,d)=>s+d.total,0)*platSpv).toFixed(0)];
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([
     ['OmniTrust Somalia — Platform Participation Revenue (L2)'],
-    [`${INSTITUTIONS.length} institutions · SPV ${Math.round(platSpv*100)}%`],
+    [`${INSTITUTIONS.length} institutions`],
     [''],
     ['Fee Schedule:','Cat A Tiers: RP-T1=$'+OV_PLAT_A.T1+' / T2=$'+OV_PLAT_A.T2+' / T3=$'+OV_PLAT_A.T3+' / T4=$'+OV_PLAT_A.T4+' / T5=$'+OV_PLAT_A.T5],
     ['','Cat B Tiers: IV-T1=$'+OV_PLAT_B.T1+' / T2=$'+OV_PLAT_B.T2+' / T3=$'+OV_PLAT_B.T3+' / T4=$'+OV_PLAT_B.T4+' / T5=$'+OV_PLAT_B.T5],
     [''],
-    platHdr,...platRows,[''],platSumRow,platT5Row,
+    platHdr,...platRows,[''],platSumRow,
   ]),'Platform_Participation');
 
-  XLSX.writeFile(wb,`OmniTrust_Somalia_${new Date().toISOString().slice(0,10)}.xlsx`);
+  XLSX.writeFile(wb,`OmniTrust_Somalia_${ts.file}.xlsx`);
 }
 
 // ── Legacy CSV (single sheet, backwards compat) ────────────────────────────
 function exportCSV_legacy(){
   const params=getParams();const rates=getRates();
   const proj=UC.map(u=>projectUC(u,params,rates,'baseline')); // exports always reflect Baseline, regardless of dashboard scenario toggle
+  const ts=exportTimestamp();
   let csv='Somalia Partner Data — OmniTrust DPI\n';
-  csv+=`Date,${new Date().toISOString().slice(0,10)}\n\n`;
+  csv+=`Generated,${ts.display}\n\n`;
   csv+='UC Code,Use Case,Sector,Pattern,Enabled,P%,E/yr,A_frac,Unit_Price(p_u),';
-  csv+=YEARS.map(y=>'V_'+y).join(',')+','+YEARS.map(y=>'R_'+y).join(',')+',10yr_OT_Total,10yr_T5_Total\n';
+  csv+=YEARS.map(y=>'V_'+y).join(',')+','+YEARS.map(y=>'R_'+y).join(',')+',10yr_OT_Total\n';
   proj.sort((a,b)=>b.totRev-a.totRev).forEach(({uc,rows,totRev})=>{
     const en=isEnabled(uc.id)?1:0;
     const P_val=(getOv(OV.P,uc.id,sugP(uc))*100).toFixed(1);
@@ -2036,12 +2019,12 @@ function exportCSV_legacy(){
     const pr=OV.prices[uc.id]!==undefined?OV.prices[uc.id]:sug;
     const vols=rows.map(r=>r.events.toFixed(0));
     const revs=rows.map(r=>r.rev.toFixed(2));
-    csv+=`"${uc.id}","${getDesc(uc).replace(/"/g,'""')}","${uc.s}","${PAT_LABEL[getPat(uc.svcs,uc.id)]}",${en},${P_val},${E_val},${A_frac},${pr.toFixed(4)},${vols.join(',')},${revs.join(',')},${totRev.toFixed(2)},${(totRev*params.spv).toFixed(2)}\n`;
+    csv+=`"${uc.id}","${getDesc(uc).replace(/"/g,'""')}","${uc.s}","${PAT_LABEL[getPat(uc.svcs,uc.id)]}",${en},${P_val},${E_val},${A_frac},${pr.toFixed(4)},${vols.join(',')},${revs.join(',')},${totRev.toFixed(2)}\n`;
   });
   const blob=new Blob([csv],{type:'text/csv'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
-  a.download=`OmniTrust_Somalia_Projection_${new Date().toISOString().slice(0,10)}.csv`; // legacy
+  a.download=`OmniTrust_Somalia_Projection_${ts.file}.csv`; // legacy
   a.click();
 }
 
@@ -2190,8 +2173,9 @@ function resetForm(){
 function exportCSV(){
   const params=getParams();const rates=getRates();
   const proj=UC.map(u=>projectUC(u,params,rates,'baseline'));  // exports always reflect Baseline, regardless of dashboard scenario toggle
+  const ts=exportTimestamp();
   let csv='Somalia Partner Data — OmniTrust DPI\n';
-  csv+=`Date,${new Date().toISOString().slice(0,10)}\nTotal Pop,${params.pop}\nSPV,${params.spv*100}%\n\n`;
+  csv+=`Generated,${ts.display}\nTotal Pop,${params.pop}\n\n`;
   csv+='UC Code,Use Case,Sector,Pattern,P%,E/yr,AR Y1%,Unit Price,';
   csv+=YEARS.join(',')+',10yr Total\n';
   proj.sort((a,b)=>b.totRev-a.totRev).forEach(({uc,rows,totRev})=>{
@@ -2206,7 +2190,7 @@ function exportCSV(){
   const blob=new Blob([csv],{type:'text/csv'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
-  a.download=`OmniTrust_Somalia_Projection_${new Date().toISOString().slice(0,10)}.csv`; // legacy
+  a.download=`OmniTrust_Somalia_Projection_${ts.file}.csv`; // legacy
   a.click();
 }
 
