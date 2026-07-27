@@ -1125,6 +1125,39 @@ const PAT_CLS={
   'ver':'pat-ver','ren':'pat-ren','lif':'pat-lif',
   'iss':'pat-iss','upd':'pat-upd','other':'pat-onb'
 };
+// The service composition each pattern implies — picking a pattern from the dropdown re-shapes
+// the use case's actual services to match (adding/removing eKYC/CI/CV/Auth as needed), so the
+// two never drift apart the way a purely cosmetic label override would let them. 'pay' (payment
+// rail) sits outside this taxonomy entirely and is left untouched regardless of pattern.
+// 'other' has no single canonical mix — selecting it leaves the current services as-is.
+const PAT_CANONICAL_SVCS={
+  onb:{ekyc:'T1', ci:'L1'},           // Onboarding — eKYC + CI
+  id:{ekyc:'T1'},                     // ID check — eKYC only, no issuance
+  auth:{auth:'L1'},                   // Auth only — no eKYC, no CI/CV
+  ver:{cv:'L1', auth:'L1'},           // Verification — CV + Auth, no eKYC/CI
+  ren:{ci:'L1', auth:'L1'},           // Renewal — CI + Auth, no eKYC/CV
+  lif:{ci:'L1', cv:'L1', auth:'L1'},  // Lifecycle — CI + CV + Auth
+  iss:{ci:'L1', auth:'L1'},           // Issuance — CI + Auth (distinguished from Renewal/Update by name only)
+  upd:{ci:'L1', auth:'L1'},           // Update — CI + Auth
+};
+// Reshapes a use case's service mix to the canonical composition for `patternKey`, storing the
+// result as a per-service override (OV.svcs) so it layers on top of the shipped dataset the same
+// way manual tier edits already do. Services the pattern doesn't use are explicitly suppressed
+// (set to false) rather than left dangling from whatever composition the UC had before.
+function applyPatternToSvcs(ucId, patternKey){
+  const uc=UC.find(u=>u.id===ucId); if(!uc) return;
+  const canonical=PAT_CANONICAL_SVCS[patternKey];
+  if(!canonical) return; // 'other' — no canonical mix, leave services untouched
+  const ov={};
+  ['ekyc','ci','cv','auth'].forEach(k=>{
+    const want=canonical[k];
+    if(want){ if(uc.svcs[k]!==want) ov[k]=want; }
+    else{ if(uc.svcs[k]) ov[k]=false; }
+  });
+  if(Object.keys(ov).length) OV.svcs[ucId]=Object.assign({},OV.svcs[ucId],ov);
+  else delete OV.svcs[ucId];
+  delete OV.prices[ucId]; // suggested price should recompute from the new service mix
+}
 
 // ── Suggested values ─────────────────────────────────────────────────────────
 function sugP(uc){return SEC_P[uc.s]||0.04;}
@@ -1319,7 +1352,7 @@ function renderPriceTbl(){
           data-id="${u.id}" value="${escAttr(getDesc(u))}" title="Edit use case description"
           onchange="onDescChange(this)" onfocus="this.select()"></td>
       <td><select class="pat-sel ${PAT_CLS[pat]}${OV.pattern[u.id]?' pat-changed':''}"
-          data-id="${u.id}" title="${PAT_TITLE[pat]||''} — override the auto-assigned pattern"
+          data-id="${u.id}" title="${PAT_TITLE[pat]||''} — choosing a pattern also updates the services below to match it"
           onchange="onPatChange(this)">
           <option value="" ${!OV.pattern[u.id]?'selected':''}>${PAT_LABEL[autoPat(effSvcs,u.id)]}</option>
           ${Object.keys(PAT_LABEL).map(k=>`<option value="${k}" ${k===OV.pattern[u.id]?'selected':''}>${PAT_LABEL[k]}</option>`).join('')}
@@ -1370,9 +1403,14 @@ function onPatChange(sel){
   const id=sel.dataset.id;
   const uc=UC.find(u=>u.id===id);if(!uc)return;
   const v=sel.value;
-  if(v===''){ delete OV.pattern[id]; } else { OV.pattern[id]=v; }
+  if(v===''){
+    delete OV.pattern[id]; // back to Auto — label recomputes from whatever services are set
+  }else{
+    OV.pattern[id]=v;
+    applyPatternToSvcs(id,v); // keep services in sync — e.g. Auth only clears eKYC/CI/CV
+  }
   markUnsaved();
-  renderPriceTbl(); // pattern can change suggested E → refresh suggested price/frequency
+  renderPriceTbl(); // service badges + suggested E/price can all change
   recalc();
 }
 
