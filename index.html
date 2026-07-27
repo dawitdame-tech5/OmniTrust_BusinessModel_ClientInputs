@@ -196,6 +196,15 @@ select.ramp-sel.ramp-changed{border-color:var(--orange);background:var(--orange-
 .svc-v{background:#DBEAFE;color:#1E40AF}
 .svc-a{background:#EDE9FE;color:#6D28D9}
 .svc-p{background:#D1FAE5;color:#065F46}
+.svc-rm{border:none;background:none;color:inherit;cursor:pointer;font-size:10px;padding:0 0 0 2px;line-height:1;opacity:.7}
+.svc-rm:hover{opacity:1}
+/* "+ add…" service picker — deliberately plain/neutral so it reads as an affordance, not a set value */
+.svc-add{display:inline-block;font-size:8px;font-weight:700;color:var(--mid);
+  padding:1px 12px 1px 4px;border-radius:3px;border:1px dashed var(--lt);cursor:pointer;
+  font-family:inherit;background-color:transparent;appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23888'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 3px center;background-size:6px}
+.svc-add:hover{border-color:var(--navy);color:var(--navy)}
 
 /* Editable cell */
 .cell-edit{display:flex;align-items:center;gap:5px;min-width:90px}
@@ -1001,6 +1010,15 @@ const SVC_TIERS = {
   cv:   ['Base','L1','L2','L3'],
   auth: ['Base','L1','L2','L3'],
 };
+// Canonical display/processing order for a use case's service bundle — mirrors the real-world
+// sequence (identity proofing → credential issuance → credential verification → authentication →
+// payment), e.g. "eKYC followed by Issuance" or "Auth followed by Issuance", so a bundle always
+// reads in a sensible order regardless of how the underlying data happens to be keyed.
+const SVC_ORDER = ['ekyc','ci','cv','auth','pay'];
+const SVC_SHORT_LABEL = {ekyc:'eKYC', ci:'CI', cv:'CV', auth:'Auth', pay:'Pay'};
+const SVC_FULL_LABEL  = {ekyc:'eKYC (identity proofing)', ci:'CI (Credential Issuance)',
+  cv:'CV (Credential Verification)', auth:'Auth (Authentication)', pay:'Pay (payment rail)'};
+const SVC_CLS = {ekyc:'svc-e', ci:'svc-c', cv:'svc-v', auth:'svc-a', pay:'svc-p'};
 
 // Get effective service mix for a UC (baseline override applied)
 function getUCSvcs(uc){
@@ -1026,36 +1044,35 @@ function deriveSvcs(baseSvcs, dir){
   return out;
 }
 
+// newTier is either a real tier value ('T1'/'L1'/etc, or `true` for 'pay') or '' to mean "remove
+// this service from the bundle entirely" (stored as an explicit `false` override — the same
+// convention Pattern-driven reshaping already uses to suppress a service).
 function onSvcChange(ucId, svcType, newTier){
   const uc = UC.find(u=>u.id===ucId); if(!uc) return;
-  // Store override only if different from default
-  if(uc.svcs[svcType] === newTier || (newTier==='Base' && !uc.svcs[svcType])){
+  const newVal = newTier===''? false : newTier;
+  const defaultVal = uc.svcs[svcType] || false; // absent-by-default and "off" are equivalent
+  if(newVal===defaultVal){
     if(OV.svcs[ucId]){ delete OV.svcs[ucId][svcType];
       if(!Object.keys(OV.svcs[ucId]).length) delete OV.svcs[ucId]; }
   } else {
     if(!OV.svcs[ucId]) OV.svcs[ucId] = {};
-    OV.svcs[ucId][svcType] = newTier;
+    OV.svcs[ucId][svcType] = newVal;
   }
-  // Clear manual price override — suggested price should recompute from new tier
+  // Clear manual price override — suggested price should recompute from the new bundle
   delete OV.prices[ucId];
   markUnsaved();
-  // Update just this row's suggested price + price input + pattern in-place
-  const rates = getRates();
-  const effSvcs = getUCSvcs(uc);
-  const newSug = sugPrice(effSvcs, rates);
-  const sugEl = document.getElementById('sug-'+ucId);
-  if(sugEl) sugEl.textContent = '$'+newSug.toFixed(3);
-  const inp = document.querySelector(`input[data-id="${ucId}"]`);
-  if(inp && !inp.classList.contains('overridden')){
-    inp.value = newSug.toFixed(3);
-    inp.dataset.sug = newSug;
-  }
-  // Mark changed badge
-  document.querySelectorAll(`.svc-sel[data-id="${ucId}"][data-svc="${svcType}"]`).forEach(sel=>{
-    sel.classList.toggle('svc-changed', OV.svcs[ucId]?.[svcType] !== undefined);
-  });
-  // Update volume revenue cells + scenario strip
-  updateRevCellsOnly();
+  // Adding/removing a service changes the whole set of badges shown for this row (and possibly
+  // the "+ add…" list of what's left to add), not just one cell — re-render the table rather
+  // than patch cells in place, same as a Pattern change already does.
+  renderPriceTbl();
+  recalc();
+}
+// The "+ add…" control next to a row's service badges only lists services NOT already present.
+// Picking one adds it at a sensible starting tier (or `true` for the tier-less Pay service).
+function onSvcAdd(ucId, svcType){
+  if(!svcType) return;
+  const startTier = svcType==='pay' ? true : svcType==='ekyc' ? 'T1' : 'L1';
+  onSvcChange(ucId, svcType, startTier);
 }
 
 // Per-UC pattern overrides — for cases where service-flag logic gives the wrong label
@@ -1335,16 +1352,34 @@ function renderPriceTbl(){
     }
     const effSvcs=getUCSvcs(u);
     const pat=getPat(effSvcs, u.id);
-    const svcBadges=Object.entries(effSvcs).filter(([k,v])=>v).map(([k,v])=>{
-      const cls=k==='ekyc'?'svc-e':k==='ci'?'svc-c':k==='cv'?'svc-v':k==='auth'?'svc-a':'svc-p';
-      if(k==='pay') return`<span class="svc ${cls}">Pay</span>`;
+    // Bundle badges — always in canonical sequence (eKYC → CI → CV → Auth → Pay), and every
+    // tier is labeled with its service (not just eKYC), so a multi-service bundle like
+    // "CI L1 + Auth L1" (e.g. Renewal/Issuance) is unambiguous instead of showing "L1 L1".
+    const svcBadges=SVC_ORDER.filter(k=>effSvcs[k]).map(k=>{
+      const v=effSvcs[k];
+      const cls=SVC_CLS[k];
+      const lbl=SVC_SHORT_LABEL[k];
+      if(k==='pay') return`<span class="svc ${cls}">Pay
+        <button type="button" class="svc-rm" title="Remove Pay from this use case's bundle"
+          onclick="onSvcChange('${u.id}','pay','')">×</button></span>`;
       const tiers=SVC_TIERS[k]||[];
       const isChanged=OV.svcs[u.id]?.[k]!==undefined;
-      const opts=tiers.map(t=>`<option value="${t}" ${t===v?'selected':''}>${k==='ekyc'?'eKYC ':''}${t}</option>`).join('');
+      const opts=`<option value="">✕ remove ${lbl}</option>`
+        +tiers.map(t=>`<option value="${t}" ${t===v?'selected':''}>${lbl} ${t}</option>`).join('');
       return`<select class="svc-sel ${cls}${isChanged?' svc-changed':''}"
-        data-id="${u.id}" data-svc="${k}" title="Change ${k.toUpperCase()} tier"
+        data-id="${u.id}" data-svc="${k}" title="${SVC_FULL_LABEL[k]} — change the tier, or pick “remove” to drop it from this use case's bundle"
         onchange="onSvcChange('${u.id}','${k}',this.value)">${opts}</select>`;
     }).join(' ');
+    // "+ add…" lists only the services NOT already in this use case's bundle, so an unusual
+    // combination (e.g. eKYC + Auth with no Issuance) can be built directly, not just the 9
+    // canonical Pattern presets.
+    const missingSvcs=SVC_ORDER.filter(k=>!effSvcs[k]);
+    const svcAddCtrl=missingSvcs.length?`<select class="svc-add" data-id="${u.id}"
+        title="Add another service to this use case's bundle"
+        onchange="onSvcAdd('${u.id}',this.value);this.selectedIndex=0;">
+        <option value="">+ add…</option>
+        ${missingSvcs.map(k=>`<option value="${k}">${SVC_SHORT_LABEL[k]}</option>`).join('')}
+      </select>`:'';
     const sug=sugPrice(effSvcs,rates);
     const ov=OV.prices[u.id];
     const val=ov!==undefined?ov:sug;
@@ -1363,7 +1398,7 @@ function renderPriceTbl(){
           <option value="" ${!OV.pattern[u.id]?'selected':''}>${PAT_LABEL[autoPat(effSvcs,u.id)]}</option>
           ${Object.keys(PAT_LABEL).map(k=>`<option value="${k}" ${k===OV.pattern[u.id]?'selected':''}>${PAT_LABEL[k]}</option>`).join('')}
         </select></td>
-      <td>${svcBadges}</td>
+      <td>${svcBadges} ${svcAddCtrl}</td>
       <td class="r" style="color:var(--mid);font-style:italic" id="sug-${u.id}">$${sug.toFixed(3)}</td>
       <td class="r"><div class="cell-edit">
         <span class="usd">$</span>
