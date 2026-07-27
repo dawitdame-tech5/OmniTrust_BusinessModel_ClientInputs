@@ -83,6 +83,47 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
   box-shadow:0 0 0 2px rgba(27,58,106,.10)}
 .param-item .hint{font-size:9.5px;color:var(--mid);margin-top:3px}
 
+/* ── Add Use Case panel ── */
+.add-uc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.add-uc-svcs{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
+.add-uc-svc{display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--lt);
+  border-radius:var(--r);background:var(--sand)}
+.add-uc-svc label{font-size:11px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:5px;cursor:pointer}
+.add-uc-svc select{font-size:10.5px;padding:3px 6px;border-radius:4px;border:1px solid var(--lt)}
+
+/* ── Scenario Presets tab ── */
+.scen-mode-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.scen-mode-row label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--mid)}
+.mode-toggle{display:inline-flex;border:1px solid var(--lt);border-radius:6px;overflow:hidden}
+.mode-btn{padding:5px 12px;font-size:10.5px;font-weight:700;border:none;background:var(--white);
+  color:var(--mid);cursor:pointer}
+.mode-btn:not(:last-child){border-right:1px solid var(--lt)}
+.mode-btn.act{background:var(--navy);color:#fff}
+.mode-note{font-size:10px;color:var(--mid);font-style:italic}
+.sp-card{border-radius:10px;padding:16px 18px;margin-bottom:16px;border:1.5px solid var(--lt);background:var(--white)}
+.sp-card.cons{border-color:#BFDBFE}
+.sp-card.base{border-color:#99D4D4}
+.sp-card.opt{border-color:#FBC7A4}
+.sp-hdr{display:flex;align-items:baseline;gap:10px;margin-bottom:4px}
+.sp-hdr h3{font-size:13px;font-weight:700;margin:0}
+.sp-card.cons .sp-hdr h3{color:#2563EB}
+.sp-card.base .sp-hdr h3{color:#006767}
+.sp-card.opt .sp-hdr h3{color:#F26522}
+.sp-hdr .sp-summary{margin-left:auto;font-size:11.5px;font-weight:700;color:var(--navy);font-family:monospace}
+.sp-desc{font-size:10.5px;color:var(--mid);margin-bottom:12px}
+.sp-section{margin-top:12px;padding-top:12px;border-top:1px dashed var(--lt)}
+.sp-section-title{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--mid);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.sp-section-title label{display:flex;align-items:center;gap:6px;font-weight:700;cursor:pointer;text-transform:none;letter-spacing:0;font-size:11px;color:var(--navy)}
+.sp-loa-row{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end}
+.sp-loa-row .param-item{width:180px}
+.sp-uc-list{max-height:220px;overflow-y:auto;border:1px solid var(--lt);border-radius:var(--r);
+  padding:8px 10px;background:var(--sand);font-size:11px}
+.sp-uc-sec-lbl{font-weight:700;color:var(--navy);font-size:10px;text-transform:uppercase;
+  letter-spacing:.3px;margin:8px 0 3px;padding-top:6px;border-top:1px solid var(--lt)}
+.sp-uc-sec-lbl:first-child{margin-top:0;border-top:none;padding-top:0}
+.sp-uc-row{display:flex;align-items:center;gap:6px;padding:2px 0;color:var(--near)}
+.sp-uc-row input{cursor:pointer}
+
 /* ── AR grid ── */
 .ar-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:6px}
 .ar-cell label{font-size:9px;font-weight:700;color:var(--mid);text-align:center;
@@ -126,6 +167,26 @@ tr.sec-hdr td .sec-count{opacity:.55;font-weight:400;margin-left:6px}
 .pat-ver{background:#EDE9FE;color:#5B21B6}
 .pat-ren{background:#ECFDF5;color:#065F46}
 .pat-lif{background:#FEF3C7;color:#92400E}
+.pat-iss{background:#FCE7F3;color:#9D174D}
+.pat-upd{background:#F3F4F6;color:#374151}
+
+/* Editable use-case description (Price tab) */
+input.uc-desc-inp{width:100%;min-width:160px;padding:4px 6px;font-size:11px;
+  border:1px solid transparent;border-radius:4px;background:transparent;color:var(--near)}
+input.uc-desc-inp:hover{border-color:var(--lt)}
+input.uc-desc-inp:focus{outline:none;border-color:var(--orange);background:var(--white)}
+input.uc-desc-inp.overridden{border-color:var(--orange);background:var(--orange-lt);color:var(--orange-dk);font-weight:600}
+
+/* Editable pattern dropdown (Price tab) — reuses .pat-* badge colors */
+select.pat-sel{font-size:9px;font-weight:700;padding:2px 4px;border-radius:3px;
+  text-transform:uppercase;letter-spacing:.2px;border:1px solid transparent;cursor:pointer}
+select.pat-sel:hover{border-color:rgba(0,0,0,.2)}
+select.pat-sel.pat-changed{border-color:var(--orange)!important;box-shadow:0 0 0 1px var(--orange)}
+
+/* Ramp-shape dropdown (Volume tab) */
+select.ramp-sel{font-size:9.5px;font-weight:600;padding:3px 4px;border-radius:4px;
+  border:1px solid var(--lt);background:var(--white);color:var(--navy);cursor:pointer;width:100%}
+select.ramp-sel.ramp-changed{border-color:var(--orange);background:var(--orange-lt);color:var(--orange-dk);font-weight:700}
 
 /* Service badges */
 .svc{display:inline-flex;align-items:center;gap:2px;font-size:9px;font-weight:700;
@@ -202,6 +263,9 @@ tr.sec-hdr td .sec-count{opacity:.55;font-weight:400;margin-left:6px}
 input.uc-cb{width:15px;height:15px;accent-color:var(--orange);cursor:pointer}
 .excluded-row{opacity:.38}
 .excluded-row td{color:var(--mid)!important;background:#FAFAFA!important}
+.excl-badge{display:inline-block;font-size:8px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.3px;color:var(--orange-dk);background:var(--orange-lt);border-radius:3px;
+  padding:1px 5px;margin-left:5px;white-space:nowrap}
 .sel-strip{display:flex;gap:5px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
 .sel-btn{font-size:10px;padding:3px 10px;border-radius:100px;border:1px solid var(--lt);
   background:var(--white);color:var(--mid);cursor:pointer;transition:all .12s;white-space:nowrap}
@@ -218,8 +282,14 @@ input.uc-cb{width:15px;height:15px;accent-color:var(--orange);cursor:pointer}
 }
 
 /* Scenario comparison strip */
-#scen-strip{display:flex;gap:10px;margin-bottom:14px}
-.sc-card{flex:1;border-radius:8px;padding:11px 14px}
+#scen-strip{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.scen-picker{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.scen-picker label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--mid)}
+.scen-picker select{font-size:11px;font-weight:600;padding:4px 8px;border-radius:6px;
+  border:1px solid var(--lt);background:var(--white);color:var(--navy);cursor:pointer}
+.scen-picker select:focus{outline:none;border-color:var(--orange)}
+.scen-hint{font-size:9.5px;color:var(--mid);font-style:italic}
+.sc-card{border-radius:8px;padding:11px 14px;max-width:480px}
 .sc-card.cons{background:#EFF6FF;border:1.5px solid #BFDBFE}
 .sc-card.base{background:#E0F0F0;border:1.5px solid #99D4D4}
 .sc-card.opt {background:#FEF0E8;border:1.5px solid #FBC7A4}
@@ -350,6 +420,7 @@ for(var p=0,v=0;p!==c.length;++p)if((v=c.charCodeAt(p))===n||v===i||v===34||f.fo
   <button class="tab act" onclick="switchTab(0)">① Unit Prices</button>
   <button class="tab"     onclick="switchTab(1)">② Volume &amp; Projection</button>
   <button class="tab"     onclick="switchTab(2)">③ Platform Participation</button>
+  <button class="tab"     onclick="switchTab(3)">④ Scenario Presets</button>
 </div>
 
 <!-- ── Tab 0: Price Table ── -->
@@ -516,10 +587,38 @@ for(var p=0,v=0;p!==c.length;++p)if((v=c.charCodeAt(p))===n||v===i||v===34||f.fo
 <div class="sel-strip">
   <button class="sel-btn" onclick="selectAll()">✓ Include all</button>
   <button class="sel-btn" onclick="deselectAll()">✗ Exclude all</button>
-  <button class="sel-btn" onclick="selectSectorEnabled()">✓ Sector only</button>
+  <button class="sel-btn" onclick="selectSectorEnabled()">✓ Selected sectors only</button>
   <button class="sel-btn" onclick="invertSelection()">⇌ Invert</button>
+  <button class="sel-btn" style="margin-left:auto;background:var(--navy);color:#fff;border-color:var(--navy)" onclick="toggleAddUcPanel()">+ Add Use Case</button>
   <span class="included-count" id="inc-count-0">164 / 164 included</span>
 </div>
+
+<!-- Add Use Case panel (hidden by default) -->
+<div class="card" id="add-uc-panel" style="display:none;margin-bottom:12px;border:1.5px solid var(--navy)">
+  <div class="card-title">Add a new use case</div>
+  <div class="add-uc-grid">
+    <div class="param-item">
+      <label>Sector</label>
+      <select id="add-uc-sector" onchange="onAddUcSectorChange()"></select>
+    </div>
+    <div class="param-item" id="add-uc-newsector-wrap" style="display:none">
+      <label>New sector name</label>
+      <input type="text" id="add-uc-newsector" placeholder="e.g. Sports & Recreation">
+    </div>
+    <div class="param-item" style="grid-column:span 2">
+      <label>Use case description</label>
+      <input type="text" id="add-uc-name" placeholder="e.g. Passport — Biometric renewal">
+    </div>
+  </div>
+  <div style="margin-top:10px;font-size:10px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:.4px">Services included</div>
+  <div class="add-uc-svcs" id="add-uc-svcs"></div>
+  <div style="margin-top:12px;display:flex;gap:8px">
+    <button class="sel-btn" style="background:var(--navy);color:#fff;border-color:var(--navy)" onclick="submitNewUseCase()">Add use case</button>
+    <button class="sel-btn" onclick="toggleAddUcPanel(false)">Cancel</button>
+    <span id="add-uc-error" style="color:var(--orange-dk);font-size:10.5px;align-self:center"></span>
+  </div>
+</div>
+
   <!-- Price table -->
   <div class="tbl-wrap" id="price-tbl-wrap">
     <table id="price-tbl">
@@ -533,6 +632,7 @@ for(var p=0,v=0;p!==c.length;++p)if((v=c.charCodeAt(p))===n||v===i||v===34||f.fo
           <th class="r" style="width:100px">Suggested $</th>
           <th class="r" style="width:120px">Your Price $</th>
           <th style="width:60px">Status</th>
+          <th style="width:26px"></th>
         </tr>
       </thead>
       <tbody id="price-tbody"></tbody>
@@ -551,6 +651,7 @@ for(var p=0,v=0;p!==c.length;++p)if((v=c.charCodeAt(p))===n||v===i||v===34||f.fo
     The <b>Adoption Ramp (AR)</b> defines how adoption grows from 2027 to 2036.
     All suggested values reflect Somalia's nascent digital infrastructure context.
     Revenue = Enrolled Pop × P% × AR[year] × E × Unit Price. All figures in USD.
+    Use the <b>Active scenario</b> picker below to view the whole dashboard under Conservative, Baseline, or Optimistic assumptions — CSV/XLSX exports always report Baseline.
   </div>
 
   <!-- Context parameters -->
@@ -608,7 +709,7 @@ for(var p=0,v=0;p!==c.length;++p)if((v=c.charCodeAt(p))===n||v===i||v===34||f.fo
 <div class="sel-strip">
   <button class="sel-btn" onclick="selectAll()">✓ Include all</button>
   <button class="sel-btn" onclick="deselectAll()">✗ Exclude all</button>
-  <button class="sel-btn" onclick="selectSectorEnabled()">✓ Sector only</button>
+  <button class="sel-btn" onclick="selectSectorEnabled()">✓ Selected sectors only</button>
   <button class="sel-btn" onclick="invertSelection()">⇌ Invert</button>
   <span class="included-count" id="inc-count-1">164 / 164 included</span>
 </div>
@@ -634,7 +735,8 @@ for(var p=0,v=0;p!==c.length;++p)if((v=c.charCodeAt(p))===n||v===i||v===34||f.fo
             <th style="width:90px">Pattern</th>
             <th class="c" style="width:82px">P %<br><span style="font-weight:400;color:var(--mid)">applicability</span></th>
             <th class="c" style="width:70px">E /yr<br><span style="font-weight:400;color:var(--mid)">frequency</span></th>
-            <th class="c" style="width:68px">A yr1 %<br><span style="font-weight:400;color:var(--mid)">adoption</span></th>
+            <th class="c" style="width:68px">A yr1 %<br><span style="font-weight:400;color:var(--mid)">adoption — editable</span></th>
+            <th class="c" style="width:88px">Ramp shape<br><span style="font-weight:400;color:var(--mid)">S-curve speed</span></th>
             <th class="r yr" style="width:58px">2027</th>
             <th class="r yr" style="width:58px">2028</th>
             <th class="r yr" style="width:58px">2029</th>
@@ -784,10 +886,28 @@ for(var p=0,v=0;p!==c.length;++p)if((v=c.charCodeAt(p))===n||v===i||v===34||f.fo
   </div>
 </div>
 
+<!-- ── Tab 3: Scenario Presets ── -->
+<div id="tab-3" class="tab-panel">
+  <div class="instr">
+    <b>Instructions — Scenario Presets:</b>
+    Define what "Conservative", "Baseline" and "Optimistic" mean for this country: population assumptions,
+    the Level of Assurance (LoA) targeted, applicability/frequency multipliers, the adoption ramp curve, and
+    (optionally) a curated subset of use cases. Baseline always mirrors your Price &amp; Volume tab inputs exactly.
+    These presets drive the exported 3-scenario workbook, and — when you switch the Volume tab to
+    <b>Scenario Presets</b> mode — the live dashboard too.
+  </div>
+  <div id="scen-presets-root"></div>
+</div>
+
 <input type="file" id="import-file" accept=".json" style="display:none" onchange="loadFromFile(event)">
 
 <script>
 'use strict';
+
+// Escape a string for safe use inside an HTML attribute (e.g. an input's value="...").
+function escAttr(s){
+  return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
 
 // ── UC Data (164 use cases) ────────────────────────────────────────────────────
 const UC = [{"id":"UC-01-001","s":"Foundational Identity & Population Registers","n":"National Digital ID — Issuance","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-01-002","s":"Foundational Identity & Population Registers","n":"National Digital ID — Update identity attributes","svcs":{"ci":"L1","auth":"L1"}},{"id":"UC-01-003","s":"Foundational Identity & Population Registers","n":"National Digital ID — Download verified copy","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-01-004","s":"Foundational Identity & Population Registers","n":"Sub-national / Residency ID — Issuance & lifecycle","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-01-005","s":"Foundational Identity & Population Registers","n":"Sub-national / Residency ID — Verification","svcs":{"ekyc":"T1","cv":"L1","auth":"L1"}},{"id":"UC-01-006","s":"Foundational Identity & Population Registers","n":"National Digital ID — Renewal","svcs":{"ci":"L1","cv":"L1","auth":"L1"}},{"id":"UC-02-001","s":"Civil Registration & Vital Statistics","n":"Birth — Registration","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-02-002","s":"Civil Registration & Vital Statistics","n":"Birth — Certificate issuance","svcs":{"ci":"L1","auth":"L1"}},{"id":"UC-02-003","s":"Civil Registration & Vital Statistics","n":"Birth — Late registration","svcs":{"ci":"L1","auth":"L1"}},{"id":"UC-02-005","s":"Civil Registration & Vital Statistics","n":"Marriage — Registration & solemnization","svcs":{"ci":"L1","auth":"L1"}},{"id":"UC-02-007","s":"Civil Registration & Vital Statistics","n":"Death — Registration","svcs":{"ci":"L1","auth":"L1"}},{"id":"UC-02-008","s":"Civil Registration & Vital Statistics","n":"Death — Certificate issuance","svcs":{"ci":"L1","auth":"L1"}},{"id":"UC-03-001","s":"Citizenship & Immigration","n":"Passport — New application & issuance","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-03-002","s":"Citizenship & Immigration","n":"Passport — Renewal","svcs":{"ci":"L1","auth":"L1"}},{"id":"UC-03-003","s":"Citizenship & Immigration","n":"Passport — Replacement","svcs":{"ci":"L1","auth":"L1"}},{"id":"UC-03-004","s":"Citizenship & Immigration","n":"Electronic visa — Application","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-03-006","s":"Citizenship & Immigration","n":"Work permit — Application & issuance","svcs":{"auth":"L0"}},{"id":"UC-03-007","s":"Citizenship & Immigration","n":"Residence permit — Issuance & lifecycle","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-03-008","s":"Citizenship & Immigration","n":"Student entry permit — Application","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-03-010","s":"Citizenship & Immigration","n":"Citizenship status — Proof & verification","svcs":{"ekyc":"T1","cv":"L1","auth":"L1"}},{"id":"UC-04-001","s":"Financial Services","n":"Bank account opening — Identity verification","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-04-002","s":"Financial Services","n":"Person-to-person transfer — Instant payment","svcs":{"auth":"L0"}},{"id":"UC-04-003","s":"Financial Services","n":"Government-to-person transfer — Disbursement","svcs":{"auth":"L0"}},{"id":"UC-04-004","s":"Financial Services","n":"Cross-border payment","svcs":{"auth":"L0"}},{"id":"UC-04-005","s":"Financial Services","n":"Remittance — Customer onboarding & payout","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-04-006","s":"Financial Services","n":"Payment wallet — Issuance & identity link","svcs":{"auth":"L0"}},{"id":"UC-04-008","s":"Financial Services","n":"Microfinance account opening","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-04-009","s":"Financial Services","n":"Savings cooperative — Member onboarding","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-04-010","s":"Financial Services","n":"Savings cooperative — Loan application","svcs":{"auth":"L0"}},{"id":"UC-04-012","s":"Financial Services","n":"Savings or term deposit — Account operations","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-04-013","s":"Financial Services","n":"Micro-insurance — Onboarding & claims","svcs":{"auth":"L0"}},{"id":"UC-04-014","s":"Financial Services","n":"Digital credit provider — Onboarding","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-04-015","s":"Financial Services","n":"Payment wallet — Cash-in/out & agent management","svcs":{"auth":"L0"}},{"id":"UC-04-017","s":"Financial Services","n":"Insurance policy — Onboarding","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-04-018","s":"Financial Services","n":"Capital markets account — Onboarding","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-05-001","s":"Social Protection & Government Benefits","n":"Social benefit — Beneficiary enrollment","svcs":{"ekyc":"T1","ci":"L0"}},{"id":"UC-05-002","s":"Social Protection & Government Benefits","n":"Social benefit — Eligibility determination","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-05-003","s":"Social Protection & Government Benefits","n":"Social benefit — Payment to bank account","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-05-004","s":"Social Protection & Government Benefits","n":"Social benefit — Payment to mobile wallet","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-05-005","s":"Social Protection & Government Benefits","n":"Social benefit — Cash-out at agent","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-05-006","s":"Social Protection & Government Benefits","n":"Social benefit — Grievance & redress","svcs":{"auth":"L0"}},{"id":"UC-05-007","s":"Social Protection & Government Benefits","n":"Disability register — Enrollment & certificate","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-05-008","s":"Social Protection & Government Benefits","n":"National social fund — Member registration","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-05-009","s":"Social Protection & Government Benefits","n":"National social fund — Benefit claim","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-06-001","s":"Telecommunications","n":"Mobile SIM — New line registration","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-06-002","s":"Telecommunications","n":"Mobile SIM — Annual subscriber re-verification","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-06-004","s":"Telecommunications","n":"Mobile number portability — Identity check","svcs":{"auth":"L0"}},{"id":"UC-06-005","s":"Telecommunications","n":"Fixed broadband — Subscriber identity verification","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-06-006","s":"Telecommunications","n":"Embedded SIM — Activation & device provisioning","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-06-008","s":"Telecommunications","n":"Digital communications account — Signup","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-06-009","s":"Telecommunications","n":"Mobile account — Ongoing subscriber authentication","svcs":{"auth":"L0"}},{"id":"UC-07-001","s":"Health & Health Insurance","n":"Health insurance — Member enrollment","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-07-002","s":"Health & Health Insurance","n":"Health insurance — Policy renewal","svcs":{"ci":"L1","cv":"L1","auth":"L1"}},{"id":"UC-07-003","s":"Health & Health Insurance","n":"Health insurance — Digital card issuance","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-07-004","s":"Health & Health Insurance","n":"Health insurance — Member claim submission","svcs":{"auth":"L0"}},{"id":"UC-07-005","s":"Health & Health Insurance","n":"Health insurance — Provider claim submission","svcs":{"auth":"L0"}},{"id":"UC-07-006","s":"Health & Health Insurance","n":"Vaccination record — Proof presentation","svcs":{"auth":"L0"}},{"id":"UC-07-007","s":"Health & Health Insurance","n":"Medical test result — Proof presentation","svcs":{"ekyc":"T1","cv":"L1","auth":"L1"}},{"id":"UC-07-008","s":"Health & Health Insurance","n":"Health professional licence — Renewal (doctor)","svcs":{"ci":"L1","cv":"L1","auth":"L1"}},{"id":"UC-07-009","s":"Health & Health Insurance","n":"Health professional licence — Renewal (nurse)","svcs":{"ci":"L1","cv":"L1","auth":"L1"}},{"id":"UC-07-010","s":"Health & Health Insurance","n":"Health professional licence — Renewal (pharmacist)","svcs":{"ci":"L1","cv":"L1","auth":"L1"}},{"id":"UC-07-011","s":"Health & Health Insurance","n":"Health facility — Licensing","svcs":{"ci":"L1","auth":"L1"}},{"id":"UC-07-013","s":"Health & Health Insurance","n":"Food handler — Medical fitness certificate","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-07-020","s":"Health & Health Insurance","n":"Patient identity — Medical record linking","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-07-021","s":"Health & Health Insurance","n":"Public health programme — Enrollment","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-07-022","s":"Health & Health Insurance","n":"Health provider — Credentialing & network enrollment","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-07-023","s":"Health & Health Insurance","n":"Electronic prescription — Dispensing & verification","svcs":{"ekyc":"T1","cv":"L1","auth":"L1"}},{"id":"UC-08-001","s":"Education & Employment","n":"School — Student enrollment","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-08-002","s":"Education & Employment","n":"Examination — Registration","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-08-005","s":"Education & Employment","n":"Degree or diploma — Verification","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-08-006","s":"Education & Employment","n":"Teaching licence — Renewal","svcs":{"ci":"L1","cv":"L1","auth":"L1"}},{"id":"UC-08-007","s":"Education & Employment","n":"Teacher registry — Onboarding & payroll update","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-08-008","s":"Education & Employment","n":"Scholarship or grant — Application","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-08-009","s":"Education & Employment","n":"Lifelong learning record — Skills portfolio","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-08-010","s":"Education & Employment","n":"Academic transcript — Request & digital delivery","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-08-011","s":"Education & Employment","n":"Vocational training — Learner registration","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-08-014","s":"Education & Employment","n":"Vocational training — Certificate issuance","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-08-015","s":"Education & Employment","n":"Vocational training — Certificate verification","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-08-017","s":"Education & Employment","n":"Student loan or bursary — Application","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-09-004","s":"Transport & Mobility — Aviation","n":"Air travel — Online check-in","svcs":{"auth":"L0"}},{"id":"UC-09-005","s":"Transport & Mobility — Aviation","n":"Air travel — Pre-departure document check","svcs":{"ekyc":"T1","cv":"L1","auth":"L1"}},{"id":"UC-09-006","s":"Transport & Mobility — Aviation","n":"Air travel — Biometric boarding","svcs":{"ekyc":"T1","cv":"L1","auth":"L1"}},{"id":"UC-10-003","s":"Transport & Mobility — Road","n":"Vehicle registration — New & insurance verification","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-10-004","s":"Transport & Mobility — Road","n":"Driving licence — Issuance, renewal & demerit","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-10-005","s":"Transport & Mobility — Road","n":"Vehicle roadworthiness — Inspection certificate","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-11-001","s":"Transport & Mobility — Transit","n":"Public transit pass — Purchase","svcs":{"auth":"L0"}},{"id":"UC-11-003","s":"Transport & Mobility — Transit","n":"Public transit concession — Approval","svcs":{"auth":"L0"}},{"id":"UC-11-004","s":"Transport & Mobility — Transit","n":"Public transit gate — Entry (tap and go)","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-12-001","s":"Cross-Border & Border Control","n":"Border crossing — Digital travel credential","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-13-001","s":"Tourism & Hospitality","n":"Hotel — Digital check-in","svcs":{"ekyc":"T1","auth":"L1"}},{"id":"UC-13-003","s":"Tourism & Hospitality","n":"Car rental — Pickup identity & driving privilege check","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-13-004","s":"Tourism & Hospitality","n":"Tourist visa or visitor permit — Fast-track","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-13-005","s":"Tourism & Hospitality","n":"Event accreditation — Registration & ticketing","svcs":{"ci":"L1","cv":"L1","auth":"L1"}},{"id":"UC-14-001","s":"Media & Entertainment","n":"Age-restricted content — Access authorisation","svcs":{"ekyc":"T1","cv":"L1","auth":"L1"}},{"id":"UC-14-002","s":"Media & Entertainment","n":"Event ticket — Purchase","svcs":{"auth":"L0"}},{"id":"UC-14-003","s":"Media & Entertainment","n":"Venue entry — Ticket presentation","svcs":{"auth":"L0"}},{"id":"UC-14-004","s":"Media & Entertainment","n":"Subscription service — Signup or renewal","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-15-001","s":"Commerce, Trade & Logistics","n":"Business onboarding — Know-your-business","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-15-002","s":"Commerce, Trade & Logistics","n":"Business registration — Incorporation","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-15-003","s":"Commerce, Trade & Logistics","n":"Online marketplace seller — Onboarding","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-15-004","s":"Commerce, Trade & Logistics","n":"Merchant payment terminal — Onboarding","svcs":{"ekyc":"T1"}},{"id":"UC-15-006","s":"Commerce, Trade & Logistics","n":"Trade document — Certificate of origin verification","svcs":{"ekyc":"T1","cv":"L1","auth":"L1"}},{"id":"UC-15-008","s":"Commerce, Trade & Logistics","n":"Customs duty — Payment","svcs":{"auth":"L0"}},{"id":"UC-15-009","s":"Commerce, Trade & Logistics","n":"Import or export permit — Application","svcs":{"auth":"L0"}},{"id":"UC-15-011","s":"Commerce, Trade & Logistics","n":"Customs clearance — Declaration & risk scoring","svcs":{"auth":"L0"}},{"id":"UC-15-013","s":"Commerce, Trade & Logistics","n":"Certificate of origin — Issuance","svcs":{"ci":"L1","auth":"L1"}},{"id":"UC-16-001","s":"Property, Land & Housing","n":"Land title — Cadastral registration & issuance","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-16-002","s":"Property, Land & Housing","n":"Property — Registration & title transfer","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-16-003","s":"Property, Land & Housing","n":"Land title — Verification","svcs":{"auth":"L0"}},{"id":"UC-16-004","s":"Property, Land & Housing","n":"Lease — Application","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-16-005","s":"Property, Land & Housing","n":"Tenancy — Applicant screening","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-16-006","s":"Property, Land & Housing","n":"Building permit & occupancy certificate","svcs":{"auth":"L0"}},{"id":"UC-16-008","s":"Property, Land & Housing","n":"Property tax — Payment","svcs":{"auth":"L0"}},{"id":"UC-16-009","s":"Property, Land & Housing","n":"Housing subsidy — Application","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-17-001","s":"Utilities & Energy","n":"Electricity — New service connection","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-17-002","s":"Utilities & Energy","n":"Water — New service connection","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-17-004","s":"Utilities & Energy","n":"Utility subsidy or relief — Application","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-17-005","s":"Utilities & Energy","n":"Clean cooking programme — Beneficiary enrollment","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-17-007","s":"Utilities & Energy","n":"Utility customer — Identity refresh & arrears recovery","svcs":{"ci":"L1","auth":"L1"}},{"id":"UC-18-001","s":"Justice, Public Safety & Elections","n":"Voter registration — New or transfer","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-18-002","s":"Justice, Public Safety & Elections","n":"Election worker — Accreditation & custody chain","svcs":{"ci":"L1","cv":"L1","auth":"L1"}},{"id":"UC-18-003","s":"Justice, Public Safety & Elections","n":"Legal professional — Credential check","svcs":{"ekyc":"T1","cv":"L1","auth":"L1"}},{"id":"UC-18-006","s":"Justice, Public Safety & Elections","n":"Court — Electronic filing submission","svcs":{"auth":"L0"}},{"id":"UC-18-007","s":"Justice, Public Safety & Elections","n":"Police — Incident reporting","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-18-008","s":"Justice, Public Safety & Elections","n":"Police clearance — Criminal record certificate","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-18-010","s":"Justice, Public Safety & Elections","n":"Legal aid — Public defender intake","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-18-012","s":"Justice, Public Safety & Elections","n":"Voter eligibility — Identity check","svcs":{"ekyc":"T1","cv":"L1","auth":"L1"}},{"id":"UC-21-001","s":"Civil Service","n":"Civil servant identity card — Issuance & lifecycle","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-21-002","s":"Civil Service","n":"Civil servant identity card — Verification","svcs":{"ekyc":"T1","cv":"L1","auth":"L1"}},{"id":"UC-21-003","s":"Civil Service","n":"Government services portal — Account creation","svcs":{"auth":"L0"}},{"id":"UC-22-001","s":"Security Services & Emergency Personnel","n":"Defence forces personnel ID — Issuance","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-22-002","s":"Security Services & Emergency Personnel","n":"Police personnel ID — Issuance","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-23-001","s":"Agriculture, Forestry & Rural Services","n":"Farmer registry — Household & plot registration","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-23-003","s":"Agriculture, Forestry & Rural Services","n":"Produce traceability — Certificate of origin","svcs":{"ekyc":"T1","cv":"L1","auth":"L1"}},{"id":"UC-23-005","s":"Agriculture, Forestry & Rural Services","n":"Agricultural extension — Farmer enrollment","svcs":{"ci":"L1","auth":"L1"}},{"id":"UC-23-006","s":"Agriculture, Forestry & Rural Services","n":"Agricultural input subsidy — Electronic voucher","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-23-007","s":"Agriculture, Forestry & Rural Services","n":"Livestock identification — Tag issuance & updates","svcs":{"ci":"L1","auth":"L1"}},{"id":"UC-23-008","s":"Agriculture, Forestry & Rural Services","n":"Livestock movement — Permit & health attestation","svcs":{"auth":"L0"}},{"id":"UC-23-009","s":"Agriculture, Forestry & Rural Services","n":"Rural landholding certificate — Issuance","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-23-011","s":"Agriculture, Forestry & Rural Services","n":"Farmers cooperative — Governance","svcs":{"auth":"L0"}},{"id":"UC-24-002","s":"Environment & Natural Resources","n":"Extractive industries licence — Mining or quarrying","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-25-001","s":"Disaster Risk Management & Humanitarian Aid","n":"Disaster response — Beneficiary targeting & registry","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-25-002","s":"Disaster Risk Management & Humanitarian Aid","n":"Humanitarian aid — Cash or in-kind distribution","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-25-003","s":"Disaster Risk Management & Humanitarian Aid","n":"Early warning — Subscription & evacuation list","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-26-001","s":"Municipal & Local Government Services","n":"Local government — Service desk & complaint ticketing","svcs":{"auth":"L0"}},{"id":"UC-26-003","s":"Municipal & Local Government Services","n":"Local government — Parking penalty payment","svcs":{"auth":"L0"}},{"id":"UC-26-004","s":"Municipal & Local Government Services","n":"Local government — Civil fees & levies","svcs":{"auth":"L0"}},{"id":"UC-26-005","s":"Municipal & Local Government Services","n":"Community programme — Enrollment & targeting","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-26-006","s":"Municipal & Local Government Services","n":"Local elections — Civic registry & participation","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-26-007","s":"Municipal & Local Government Services","n":"Local government — Service request & tracking","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-26-008","s":"Municipal & Local Government Services","n":"Municipal business licence — SME","svcs":{"auth":"L0"}},{"id":"UC-26-009","s":"Municipal & Local Government Services","n":"Property rates & land tax — Assessment & payment","svcs":{"auth":"L0"}},{"id":"UC-26-010","s":"Municipal & Local Government Services","n":"Waste collection — Subscription & payment","svcs":{"auth":"L0"}},{"id":"UC-26-015","s":"Municipal & Local Government Services","n":"Grievance & ombudsperson — Intake","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-27-001","s":"Tax & Revenue Administration","n":"Taxpayer registration — Identification number","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-27-002","s":"Tax & Revenue Administration","n":"Tax filing — Submission & payment authorisation","svcs":{"auth":"L0"}},{"id":"UC-27-003","s":"Tax & Revenue Administration","n":"Withholding tax — Returns & reconciliation","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-27-004","s":"Tax & Revenue Administration","n":"Tax compliance — Audit & case management","svcs":{"auth":"L0"}},{"id":"UC-27-005","s":"Tax & Revenue Administration","n":"Property tax — Valuation & electronic assessment","svcs":{"auth":"L0"}},{"id":"UC-28-001","s":"Digital Economy & Innovation","n":"Digital wallet — Issuance & identity-linked account","svcs":{"ekyc":"T1","ci":"L1"}},{"id":"UC-28-002","s":"Digital Economy & Innovation","n":"Personal data exchange — Consent registry","svcs":{"ci":"L1","cv":"L1","auth":"L1"}},{"id":"UC-30-004","s":"Other Services","n":"Private membership pass — Gym, library or club","svcs":{"ci":"L1","auth":"L1"}},{"id":"UC-30-007","s":"Other Services","n":"Gaming or lottery — Player age-verification","svcs":{"cv":"L1","auth":"L1"}},{"id":"UC-30-008","s":"Other Services","n":"Prize claim — Identity verification & payout","svcs":{"ekyc":"T1","cv":"L1","auth":"L1"}}];
@@ -944,9 +1064,7 @@ const UC_PAT_OVERRIDE = {
   'UC-01-002': 'upd',  // National Digital ID — Update identity attributes
 };
 
-function getPat(svcs, ucId){
-  // Check per-UC override first
-  if(ucId && UC_PAT_OVERRIDE[ucId]) return UC_PAT_OVERRIDE[ucId];
+function computePatFromSvcs(svcs){
   const e=!!svcs.ekyc,c=!!svcs.ci,v=!!svcs.cv,a=!!svcs.auth;
   if(e&&c)      return'onb';  // eKYC + CI → Onboarding
   if(e&&!c&&v)  return'ver';  // eKYC + CV (+Auth) → Verification (biometric credential check)
@@ -956,6 +1074,21 @@ function getPat(svcs, ucId){
   if(c&&a&&!e&&!v)  return'ren';  // CI + Auth → Renewal (genuine re-issue)
   if(c&&v&&a)       return'lif';  // CI + CV + Auth → Lifecycle
   return'other';
+}
+// The pattern the tool would assign with no user edit: baked-in UC_PAT_OVERRIDE table, else computed from service mix.
+function autoPat(svcs, ucId){
+  if(ucId && UC_PAT_OVERRIDE[ucId]) return UC_PAT_OVERRIDE[ucId];
+  return computePatFromSvcs(svcs);
+}
+function getPat(svcs, ucId){
+  // A user's manual dropdown choice (OV.pattern) wins over everything else.
+  if(ucId && OV.pattern[ucId]) return OV.pattern[ucId];
+  return autoPat(svcs, ucId);
+}
+// Editable description: falls back to the shipped use-case name if never overridden.
+function getDesc(uc){
+  const v=OV.desc[uc.id];
+  return v!==undefined && v!=='' ? v : uc.n;
 }
 const PAT_LABEL={
   'onb':  'Onboarding',  // eKYC + CI
@@ -991,12 +1124,11 @@ const PAT_CLS={
 function sugP(uc){return SEC_P[uc.s]||0.04;}
 function sugE(uc){
   const ef=SEC_E[uc.s]||[0.10,0.5,1.0];
-  const p=getPat(uc.svcs);
+  const p=getPat(uc.svcs, uc.id);
   if(p==='auth')return ef[2];
   if(p==='onb'||p==='ren'||p==='lif')return ef[0];
   return ef[1];
 }
-function sugA(uc){return SOM_AR_DEF[0];}  // default A = AR[0]
 
 function sugPrice(svcs, rates){
   // Pick rate for each service based on its LoA tier flag in svcs
@@ -1020,8 +1152,10 @@ function sugPrice(svcs, rates){
 }
 
 // ── User overrides store ──────────────────────────────────────────────────────
-let OV = {prices:{}, P:{}, E:{}, A:{}, AR:[...SOM_AR_DEF], enabled:{}, svcs:{}};
-let currentSecFilter = null;
+let OV = {prices:{}, P:{}, E:{}, A:{}, AR:[...SOM_AR_DEF], enabled:{}, svcs:{}, pattern:{}, desc:{}, rampShape:{}};
+let currentSecFilters = new Set();
+let activeScenario = 'baseline'; // 'conservative' | 'baseline' | 'optimistic' — which preset is selected
+let scenarioMode = 'custom'; // 'custom' | 'preset' — Custom (default) ignores scenario presets entirely
 let unsaved = false;
 
 function isEnabled(id){ return OV.enabled[id]!==false; }
@@ -1082,12 +1216,13 @@ function getRates(){
 }
 
 // ── Sector list ───────────────────────────────────────────────────────────────
-const SECTORS=[...new Set(UC.map(u=>u.s))];
+function getSectors(){ return [...new Set(UC.map(u=>u.s))]; }
+function rebuildSecNavs(){ buildSecNav('sec-nav-0',0); buildSecNav('sec-nav-1',1); }
 
 // ── Sector nav ────────────────────────────────────────────────────────────────
 function buildSecNav(id,tabIdx){
   const div=document.getElementById(id);if(!div)return;
-  let h=`<button class="sec-nav-btn act" onclick="filterSec(null,${tabIdx})">All sectors</button>`;
+  let h=`<button class="sec-nav-btn act" data-sec="" onclick="filterSec(null,${tabIdx})">All sectors</button>`;
   const sec_uc={};
   UC.forEach(u=>{sec_uc[u.s]=(sec_uc[u.s]||0)+1;});
   const shorts={
@@ -1111,18 +1246,26 @@ function buildSecNav(id,tabIdx){
     'Transport & Mobility — Aviation':'Aviation',
     'Cross-Border & Border Control':'Border',
   };
-  SECTORS.forEach(s=>{
+  getSectors().forEach(s=>{
     const lbl=shorts[s]||s.split('&')[0].split('—')[0].trim().slice(0,14);
-    h+=`<button class="sec-nav-btn" onclick="filterSec('${s.replace(/'/g,"\\'")}',${tabIdx})">${lbl}</button>`;
+    h+=`<button class="sec-nav-btn" data-sec="${s.replace(/"/g,'&quot;')}" onclick="filterSec('${s.replace(/'/g,"\\'")}',${tabIdx})">${lbl}</button>`;
   });
   div.innerHTML=h;
 }
 function filterSec(sec,tabIdx){
-  currentSecFilter=sec;
+  // Multi-select: clicking "All sectors" clears the filter; clicking a sector toggles
+  // it in/out of the active set, so several sectors can be shown at once.
+  if(sec===null){
+    currentSecFilters.clear();
+  }else if(currentSecFilters.has(sec)){
+    currentSecFilters.delete(sec);
+  }else{
+    currentSecFilters.add(sec);
+  }
   document.querySelectorAll('.sec-nav').forEach(nav=>{
     nav.querySelectorAll('.sec-nav-btn').forEach(btn=>{
-      btn.classList.toggle('act',
-        btn.textContent==='All sectors'?sec===null:btn.onclick?.toString().includes(`'${sec}'`));
+      const bs=btn.dataset.sec;
+      btn.classList.toggle('act', bs===''?currentSecFilters.size===0:currentSecFilters.has(bs));
     });
   });
   renderPriceTbl();renderVolTbl();
@@ -1132,7 +1275,7 @@ function filterSec(sec,tabIdx){
 function renderPriceTbl(){
   const tbody=document.getElementById('price-tbody');if(!tbody)return;
   const rates=getRates();
-  const filtered=currentSecFilter?UC.filter(u=>u.s===currentSecFilter):UC;
+  const filtered=currentSecFilters.size?UC.filter(u=>currentSecFilters.has(u.s)):UC;
   let html='',lastSec='';
   filtered.forEach(u=>{
     if(u.s!==lastSec){
@@ -1142,7 +1285,7 @@ function renderPriceTbl(){
     html+=`<tr class="sec-hdr"><td class="cb-cell"><input type="checkbox" class="uc-cb"
       title="Select/deselect sector" ${secEnabled===secTotal?'checked':secEnabled>0?'indeterminate':''} 
       onchange="toggleSector('${u.s.replace(/'/g,"\\'")}',this.checked)"></td>
-      <td colspan="7">${u.s}<span class="sec-count">${secEnabled}/${secTotal} included</span></td></tr>`;
+      <td colspan="8">${u.s}<span class="sec-count">${secEnabled}/${secTotal} included</span></td></tr>`;
       lastSec=u.s;
     }
     const effSvcs=getUCSvcs(u);
@@ -1166,8 +1309,15 @@ function renderPriceTbl(){
       <td class="cb-cell"><input type="checkbox" class="uc-cb" ${enabled?'checked':''}
         onchange="toggleEnabled('${u.id}',this.checked)" title="${enabled?'Exclude from model':'Include in model'}"></td>
       <td class="nav">${u.id}</td>
-      <td>${u.n}</td>
-      <td><span class="pat ${PAT_CLS[pat]}" title="${PAT_TITLE[pat]||''}">${PAT_LABEL[pat]}</span></td>
+      <td><input type="text" class="uc-desc-inp${OV.desc[u.id]!==undefined?' overridden':''}"
+          data-id="${u.id}" value="${escAttr(getDesc(u))}" title="Edit use case description"
+          onchange="onDescChange(this)" onfocus="this.select()"></td>
+      <td><select class="pat-sel ${PAT_CLS[pat]}${OV.pattern[u.id]?' pat-changed':''}"
+          data-id="${u.id}" title="${PAT_TITLE[pat]||''} — override the auto-assigned pattern"
+          onchange="onPatChange(this)">
+          <option value="" ${!OV.pattern[u.id]?'selected':''}>${PAT_LABEL[autoPat(effSvcs,u.id)]}</option>
+          ${Object.keys(PAT_LABEL).map(k=>`<option value="${k}" ${k===OV.pattern[u.id]?'selected':''}>${PAT_LABEL[k]}</option>`).join('')}
+        </select></td>
       <td>${svcBadges}</td>
       <td class="r" style="color:var(--mid);font-style:italic" id="sug-${u.id}">$${sug.toFixed(3)}</td>
       <td class="r"><div class="cell-edit">
@@ -1180,6 +1330,8 @@ function renderPriceTbl(){
       <td class="c" style="font-size:10px;color:${isOv?'var(--orange-dk)':'var(--mid)'}">
         ${isOv?'★ set':'~sugg.'}
       </td>
+      <td class="c">${u.custom?`<button onclick="deleteUseCase('${u.id}')" title="Remove this custom use case"
+          style="border:none;background:none;color:var(--mid);cursor:pointer;font-size:13px;padding:2px 5px">×</button>`:''}</td>
     </tr>`;
   });
   tbody.innerHTML=html;
@@ -1195,6 +1347,133 @@ function onPriceChange(inp){
   recalc();
 }
 function onGlobalRateChange(){
+  renderPriceTbl();
+  recalc();
+}
+function onDescChange(inp){
+  const id=inp.dataset.id;
+  const uc=UC.find(u=>u.id===id);if(!uc)return;
+  const v=inp.value.trim();
+  if(v===''||v===uc.n){ delete OV.desc[id]; inp.value=uc.n; }
+  else{ OV.desc[id]=v; }
+  inp.classList.toggle('overridden',OV.desc[id]!==undefined);
+  markUnsaved();
+  recalc(); // keeps the Volume tab's use-case name column in sync
+}
+function onPatChange(sel){
+  const id=sel.dataset.id;
+  const uc=UC.find(u=>u.id===id);if(!uc)return;
+  const v=sel.value;
+  if(v===''){ delete OV.pattern[id]; } else { OV.pattern[id]=v; }
+  markUnsaved();
+  renderPriceTbl(); // pattern can change suggested E → refresh suggested price/frequency
+  recalc();
+}
+
+// ── Add Use Case ──────────────────────────────────────────────────────────────
+// New use cases are numbered like the shipped dataset (UC-<sector code>-<sequence>), not a
+// separate "UC-CUSTOM-NNN" scheme — so they read as a natural extension of that sector's
+// existing rows rather than a bolt-on category.
+function sectorCode(sector){
+  const existing=UC.find(u=>u.s===sector && /^UC-(\d+)-\d+$/.test(u.id));
+  return existing ? existing.id.match(/^UC-(\d+)-\d+$/)[1] : null;
+}
+function nextSectorCode(){
+  const used=new Set();
+  UC.forEach(u=>{ const m=u.id.match(/^UC-(\d+)-\d+$/); if(m) used.add(+m[1]); });
+  let c=1; while(used.has(c)) c++;
+  return String(c).padStart(2,'0');
+}
+function nextSeqInSector(code){
+  let max=0;
+  const re=new RegExp('^UC-'+code+'-(\\d+)$');
+  UC.forEach(u=>{ const m=u.id.match(re); if(m) max=Math.max(max,+m[1]); });
+  return String(max+1).padStart(3,'0');
+}
+// Builds the next id for a new use case in `sector` — reuses that sector's existing code if it
+// already has one, otherwise calibrates a fresh unused code (filling gaps in the shipped
+// numbering first, e.g. 19/20/29, before extending past the highest code in use).
+function nextUcId(sector){
+  const code=sectorCode(sector)||nextSectorCode();
+  let seq=nextSeqInSector(code);
+  let id=`UC-${code}-${seq}`;
+  while(UC.some(u=>u.id===id)){ seq=String(+seq+1).padStart(3,'0'); id=`UC-${code}-${seq}`; }
+  return id;
+}
+const ADD_UC_SVC_DEFS=[
+  {k:'ekyc',lbl:'eKYC',tiers:SVC_TIERS.ekyc},
+  {k:'ci',  lbl:'CI (Credential Issuance)',tiers:SVC_TIERS.ci},
+  {k:'cv',  lbl:'CV (Credential Verification)',tiers:SVC_TIERS.cv},
+  {k:'auth',lbl:'Auth',tiers:SVC_TIERS.auth},
+  {k:'pay', lbl:'Pay (payment rail)',tiers:null},
+];
+function toggleAddUcPanel(show){
+  const panel=document.getElementById('add-uc-panel');if(!panel)return;
+  const willShow = show!==undefined ? show : panel.style.display==='none';
+  panel.style.display = willShow?'':'none';
+  if(willShow) buildAddUcForm();
+}
+function buildAddUcForm(){
+  const sel=document.getElementById('add-uc-sector');
+  if(sel){
+    sel.innerHTML = getSectors().map(s=>`<option value="${escAttr(s)}">${s}</option>`).join('')
+      + `<option value="__new__">➕ New sector…</option>`;
+  }
+  document.getElementById('add-uc-newsector-wrap').style.display='none';
+  document.getElementById('add-uc-newsector').value='';
+  document.getElementById('add-uc-name').value='';
+  document.getElementById('add-uc-error').textContent='';
+  const svcsDiv=document.getElementById('add-uc-svcs');
+  if(svcsDiv){
+    svcsDiv.innerHTML=ADD_UC_SVC_DEFS.map(d=>`
+      <div class="add-uc-svc">
+        <label><input type="checkbox" id="add-uc-${d.k}-on" ${d.k==='ekyc'||d.k==='ci'?'checked':''}
+          onchange="document.getElementById('add-uc-${d.k}-tier').style.display=this.checked&&${!!d.tiers}?'':'none'">
+          ${d.lbl}</label>
+        ${d.tiers?`<select id="add-uc-${d.k}-tier" style="display:${d.k==='ekyc'||d.k==='ci'?'':'none'}">
+          ${d.tiers.map(t=>`<option value="${t}">${t}</option>`).join('')}
+        </select>`:''}
+      </div>`).join('');
+  }
+}
+function onAddUcSectorChange(){
+  const v=document.getElementById('add-uc-sector').value;
+  document.getElementById('add-uc-newsector-wrap').style.display = v==='__new__'?'':'none';
+}
+function submitNewUseCase(){
+  const errEl=document.getElementById('add-uc-error');
+  const name=document.getElementById('add-uc-name').value.trim();
+  let sector=document.getElementById('add-uc-sector').value;
+  if(sector==='__new__'){
+    sector=document.getElementById('add-uc-newsector').value.trim();
+  }
+  if(!name){ errEl.textContent='Please enter a use case description.'; return; }
+  if(!sector){ errEl.textContent='Please enter a sector name.'; return; }
+  const svcs={};
+  ADD_UC_SVC_DEFS.forEach(d=>{
+    const on=document.getElementById(`add-uc-${d.k}-on`)?.checked;
+    if(!on)return;
+    svcs[d.k] = d.tiers ? document.getElementById(`add-uc-${d.k}-tier`).value : true;
+  });
+  if(!Object.keys(svcs).length){ errEl.textContent='Select at least one service.'; return; }
+  const id=nextUcId(sector);
+  UC.push({id, s:sector, n:name, svcs, custom:true});
+  markUnsaved();
+  rebuildSecNavs();
+  renderPriceTbl();
+  recalc();
+  toggleAddUcPanel(false);
+}
+function deleteUseCase(id){
+  const uc=UC.find(u=>u.id===id);
+  if(!uc || !uc.custom) return; // safety: only custom-added use cases can be removed
+  if(!confirm(`Remove "${getDesc(uc)}" (${id})? This cannot be undone.`)) return;
+  const idx=UC.findIndex(u=>u.id===id);
+  if(idx>=0) UC.splice(idx,1);
+  // clean up any overrides keyed to the removed id
+  [OV.prices,OV.P,OV.E,OV.A,OV.enabled,OV.svcs,OV.pattern,OV.desc,OV.rampShape].forEach(store=>{ delete store[id]; });
+  markUnsaved();
+  rebuildSecNavs();
   renderPriceTbl();
   recalc();
 }
@@ -1217,14 +1496,72 @@ function enrollment(t,params){
 }
 function getAR(){return OV.AR.map(v=>v/100);}  // [0.02, 0.04, ...]
 
-function projectUC(uc,params,rates){
+// ── Adoption ramp shapes — Year 1 AND the year-2..10 trajectory are both tied to the shape ──
+// Each shape defines (a) y1Frac: the characteristic fraction of the Year-10 ceiling already
+// reached in Year 1 — this is what makes "Fast" start high (compliance/mandate-driven services
+// see near-immediate uptake) and "Slow" start low (a long "first tail" before a competitive or
+// unfamiliar service gets traction) — and (b) yrs/tail: how quickly the curve then closes the
+// gap to the ceiling. Choosing a shape auto-derives both; a manual Year-1 override (OV.A) can
+// still override the derived Year-1 value while keeping that shape's speed/tail behavior.
+const RAMP_SHAPES={
+  standard:{lbl:'Standard',                          y1Frac:0.06, yrs:8,  tail:0},
+  fast:    {lbl:'Fast (shorter — mandate-driven)',    y1Frac:0.30, yrs:3,  tail:0},
+  slow:    {lbl:'Slow (longer, first tail)',          y1Frac:0.015,yrs:14, tail:1.5},
+};
+// Builds a 10-value fraction array [Y2027..Y2036] from a shape + Year-10 ceiling (%), with an
+// optional explicit Year-1 override (%) in place of the shape's own derived Year-1.
+function deriveRampCurve(shapeKey, ceilingPct, y1OverridePct){
+  const shape=RAMP_SHAPES[shapeKey]||RAMP_SHAPES.standard;
+  const ceil=ceilingPct/100;
+  const a0=y1OverridePct!==undefined ? y1OverridePct/100 : ceil*shape.y1Frac;
+  return YEARS.map((yr,t)=>{
+    if(t===0) return a0;
+    const tt=Math.max(t-shape.tail,0);
+    const progress=1-Math.exp(-tt*1.5/Math.max(shape.yrs,0.5));
+    return a0+(ceil-a0)*progress;
+  });
+}
+// Suggested (non-overridden) Year-1 adoption for a use case — tied to its ramp shape.
+// 'standard' with no shape override mirrors the shared AR grid's own Year-1 cell exactly
+// (so nothing changes for use cases nobody has touched); Fast/Slow derive Year 1 as a
+// characteristic fraction of the shared grid's Year-10 ceiling (OV.AR[9]).
+function sugA(uc){
+  const shapeKey=OV.rampShape[uc.id]||'standard';
+  if(shapeKey==='standard') return OV.AR[0];
+  return +(OV.AR[9]*RAMP_SHAPES[shapeKey].y1Frac).toFixed(2);
+}
+// Returns a 10-value fraction array [Y2027..Y2036] for this UC's adoption curve.
+// Untouched use cases (no Year-1 override, no shape override) return the literal shared AR
+// grid unchanged — so nothing changes for anyone who doesn't use these new controls. Any other
+// use case is regenerated from its shape + the shared Year-10 ceiling (OV.AR[9]).
+function getUCRamp(uc){
+  const y1Ov=OV.A[uc.id];
+  const shapeKey=OV.rampShape[uc.id]||'standard';
+  if(y1Ov===undefined && shapeKey==='standard') return getAR();
+  return deriveRampCurve(shapeKey, OV.AR[9], y1Ov);
+}
+function onRampShapeChange(id,val){
+  if(val==='standard') delete OV.rampShape[id]; else OV.rampShape[id]=val;
+  markUnsaved();
+  recalc();
+}
+
+// Applies a scenario's assumptions on top of the client's baseline P/E/price/AR.
+// 'baseline' always equals exactly what's been entered/overridden — no scaling.
+// 'conservative'/'optimistic' pull their multipliers, LoA shift, AR curve and (optional) use-case
+// subset from the editable Scenario Presets tab (see scenarioCore, defined further down — hoisting
+// makes this safe since scenarioAdjust is only ever *called* after the whole script has loaded).
+// The Volume tab's Custom/Preset mode toggle decides whether the dashboard even looks at this:
+// in 'custom' mode projectUC always resolves to 'baseline' regardless of the requested scenario.
+function scenarioAdjust(uc, rates, scenario){
+  const c=scenarioCore(uc,rates,scenario);
+  return{P_val:c.P, E_val:c.E, price:c.price, ar:c.ar};
+}
+function projectUC(uc,params,rates,scenario){
+  scenario=scenario||activeScenario;
+  const effScenario = scenarioMode==='preset' ? scenario : 'baseline';
   const totalPop=params.pop;
-  const P_val=getOv(OV.P,uc.id,sugP(uc));
-  const E_val=getOv(OV.E,uc.id,sugE(uc));
-  const ar=getAR();
-  const effSvcs=getUCSvcs(uc);
-  const sug=sugPrice(effSvcs,rates);
-  const price=OV.prices[uc.id]!==undefined?OV.prices[uc.id]:sug;
+  const{P_val,E_val,price,ar}=scenarioAdjust(uc,rates,effScenario);
   const rows=YEARS.map((yr,t)=>{
     const enr=enrollment(t,params);
     const appPop=totalPop*enr*P_val;
@@ -1238,10 +1575,11 @@ function projectUC(uc,params,rates){
 }
 
 function recalc(){
-  const params=getParams();
+  const params=getEffectiveParams();
   const rates=getRates();
+  const scen=effectiveScenario();
   const proj=UC.map(u=>projectUC(u,params,rates));  // all UCs projected
-  const projActive=proj.filter(p=>isEnabled(p.uc.id));
+  const projActive=proj.filter(p=>isEnabled(p.uc.id) && ucInScenarioSubset(p.uc.id,scen));
   renderVolTbl(proj);
   renderProjSummary(projActive,params);
   renderKPIs(projActive,params);
@@ -1252,7 +1590,7 @@ function renderVolTbl(proj){
   const tbody=document.getElementById('vol-tbody');if(!tbody)return;
   if(!proj){recalc();return;}
   const rates=getRates();
-  const filtered=currentSecFilter?proj.filter(p=>p.uc.s===currentSecFilter):proj;
+  const filtered=currentSecFilters.size?proj.filter(p=>currentSecFilters.has(p.uc.s)):proj;
   const sorted=[...filtered].sort((a,b)=>b.totRev-a.totRev);
   const maxRev=sorted[0]?.totRev||1;
   let html='',lastSec='';
@@ -1263,21 +1601,24 @@ function renderVolTbl(proj){
       const sEn=sorted.filter(x=>x.uc.s===uc.s&&isEnabled(x.uc.id)).length;
     html+=`<tr class="sec-hdr"><td class="cb-cell"><input type="checkbox" class="uc-cb"
       ${sEn===cnt?'checked':''} onchange="toggleSector('${uc.s.replace(/'/g,"\\'")}',this.checked)">
-      </td><td colspan="17">${uc.s}<span class="sec-count">${sEn}/${cnt} · 10yr: ${fM(secRev)}</span></td></tr>`;
+      </td><td colspan="18">${uc.s}<span class="sec-count">${sEn}/${cnt} · 10yr: ${fM(secRev)}</span></td></tr>`;
       lastSec=uc.s;
     }
     const effSvcsV=getUCSvcs(uc);const pat=getPat(effSvcsV, uc.id);
-    const P_sug=sugP(uc),E_sug=sugE(uc);
-    const P_val=getOv(OV.P,uc.id,P_sug),E_val=getOv(OV.E,uc.id,E_sug);
-    const P_ov=OV.P[uc.id]!==undefined,E_ov=OV.E[uc.id]!==undefined;
+    const P_sug=sugP(uc),E_sug=sugE(uc),A_sug=sugA(uc);
+    const P_val=getOv(OV.P,uc.id,P_sug),E_val=getOv(OV.E,uc.id,E_sug),A_val=getOv(OV.A,uc.id,A_sug);
+    const P_ov=OV.P[uc.id]!==undefined,E_ov=OV.E[uc.id]!==undefined,A_ov=OV.A[uc.id]!==undefined;
+    const rampShape=OV.rampShape[uc.id]||'standard';
     const barW=Math.round((totRev/maxRev)*70);
     const yrCells=rows.map((r,t)=>`<td class="r yr-rev" id="yrv-${uc.id}-${t}">${r.rev>0?fM(r.rev):'—'}</td>`).join('');
     const enb=isEnabled(uc.id);
-    html+=`<tr class="${enb?'':'excluded-row'}">
+    const scenNow=effectiveScenario();
+    const inSub=ucInScenarioSubset(uc.id,scenNow);
+    html+=`<tr class="${(enb&&inSub)?'':'excluded-row'}">
       <td class="cb-cell"><input type="checkbox" class="uc-cb" ${enb?'checked':''}
         onchange="toggleEnabled('${uc.id}',this.checked)"></td>
       <td class="nav">${uc.id}</td>
-      <td title="${uc.n}">${uc.n.length>32?uc.n.slice(0,31)+'…':uc.n}</td>
+      <td title="${escAttr(getDesc(uc))}">${getDesc(uc).length>32?getDesc(uc).slice(0,31)+'…':getDesc(uc)}${!inSub?` <span class="excl-badge" title="Excluded by the ${SCEN_DEFS[scenNow]?.lbl||scenNow} preset's curated use-case subset">excl. by preset</span>`:''}</td>
       <td><span class="pat ${PAT_CLS[pat]}" title="${PAT_TITLE[pat]||''}">${PAT_LABEL[pat]}</span></td>
       <td class="c"><div class="cell-edit" style="justify-content:center">
         <input type="number" value="${(P_val*100).toFixed(1)}" step="0.5" min="0" max="100"
@@ -1292,8 +1633,20 @@ function renderVolTbl(proj){
           style="width:56px;${E_ov?'border-color:var(--orange);background:var(--orange-lt)':'font-style:italic;color:var(--mid)'}"
           onchange="onVolChange(this,'E')" onfocus="this.select()">
       </div></td>
-      <td class="c" style="font-size:11px;font-family:monospace;color:${P_ov||E_ov?'var(--orange-dk)':'var(--mid)'};font-style:${P_ov||E_ov?'normal':'italic'}">
-        ${(getAR()[0]*100).toFixed(1)}%
+      <td class="c"><div class="cell-edit" style="justify-content:center">
+        <input type="number" value="${A_val.toFixed(1)}" step="0.5" min="0" max="100"
+          data-id="${uc.id}" data-sug="${A_sug.toFixed(1)}" data-field="A"
+          style="width:56px;${A_ov?'border-color:var(--orange);background:var(--orange-lt)':'font-style:italic;color:var(--mid)'}"
+          title="Year 1 (2027) adoption — overrides the baseline AR grid's Year-1 value for this use case only"
+          onchange="onVolChange(this,'A')" onfocus="this.select()">
+        <span class="usd">%</span>
+      </div></td>
+      <td class="c">
+        <select class="ramp-sel${rampShape!=='standard'?' ramp-changed':''}" data-id="${uc.id}"
+          title="How fast (and from what Year-1 level) this use case's adoption approaches the shared AR grid's long-run ceiling — slower shapes may still be well short of it by 2036"
+          onchange="onRampShapeChange('${uc.id}',this.value)">
+          ${Object.entries(RAMP_SHAPES).map(([k,v])=>`<option value="${k}" ${k===rampShape?'selected':''}>${v.lbl}</option>`).join('')}
+        </select>
       </td>
       ${yrCells}
       <td class="r" style="font-weight:700;color:var(--navy)">
@@ -1309,7 +1662,9 @@ function onVolChange(inp,field){
   const id=inp.dataset.id,sug=+inp.dataset.sug;
   let v=+inp.value;
   if(isNaN(v)||v<0){inp.value=sug;v=sug;}
-  const store=field==='P'?OV.P:OV.E;
+  // P is displayed as % but stored as a fraction; E and A (Year-1 adoption, % — matches the AR grid's
+  // own units) are stored exactly as displayed.
+  const store=field==='P'?OV.P:field==='E'?OV.E:OV.A;
   const actual=field==='P'?v/100:v;
   const sugActual=field==='P'?sug/100:sug;
   setOv(store,id,actual,sugActual);
@@ -1324,7 +1679,8 @@ function onVolChange(inp,field){
 }
 
 function updateRevCellsOnly(){
-  const params=getParams(),rates=getRates();
+  const params=getEffectiveParams(),rates=getRates();
+  const scen=effectiveScenario();
   const proj=UC.map(u=>projectUC(u,params,rates));
   const allRev=proj.map(p=>p.totRev);
   const maxRev=Math.max(...allRev,1);
@@ -1338,7 +1694,7 @@ function updateRevCellsOnly(){
     const bar=document.getElementById('tot-bar-'+uc.id);
     if(bar)bar.style.width=Math.round((totRev/maxRev)*70)+'px';
   });
-  const projActive=proj.filter(p=>isEnabled(p.uc.id));
+  const projActive=proj.filter(p=>isEnabled(p.uc.id) && ucInScenarioSubset(p.uc.id,scen));
   renderProjSummary(projActive,params);
   renderKPIs(projActive,params);
   renderScenStrip();
@@ -1422,6 +1778,7 @@ function switchTab(n){
   document.querySelectorAll('.tab-panel').forEach((p,i)=>p.classList.toggle('act',i===n));
   if(n===1)recalc();
   if(n===2)initPlatformTab();
+  if(n===3)renderScenPresetsTab();
 }
 
 
@@ -1430,10 +1787,9 @@ function selectAll(){UC.forEach(u=>{delete OV.enabled[u.id];});markUnsaved();ren
 function deselectAll(){UC.forEach(u=>{OV.enabled[u.id]=false;});markUnsaved();renderPriceTbl();recalc();updateCounts();}
 function invertSelection(){UC.forEach(u=>{if(OV.enabled[u.id]===false)delete OV.enabled[u.id];else OV.enabled[u.id]=false;});markUnsaved();renderPriceTbl();recalc();updateCounts();}
 function selectSectorEnabled(){
-  const sec=currentSecFilter;
-  if(!sec){alert('Filter to a sector first using the sector nav.');return;}
-  // Enable only the current sector, disable all others
-  UC.forEach(u=>{if(u.s===sec)delete OV.enabled[u.id];else OV.enabled[u.id]=false;});
+  if(!currentSecFilters.size){alert('Filter to at least one sector first using the sector nav.');return;}
+  // Enable only the selected sector(s), disable all others
+  UC.forEach(u=>{if(currentSecFilters.has(u.s))delete OV.enabled[u.id];else OV.enabled[u.id]=false;});
   markUnsaved();renderPriceTbl();recalc();updateCounts();
 }
 function toggleSector(sec,val){
@@ -1483,11 +1839,18 @@ function exportXLSX(){
     ['eKYC T1 rate',rates.eT1,'ABIS + liveness + E&O cost floor'],
     ['Auth L1',rates.aL1,''],['CI L1',rates.cL1,''],['CV L1',rates.vL1,''],
     [''],
-    ['SCENARIO AUTO-DERIVATION FROM CLIENT BASELINE','',''],
-    ['Scenario','LoA','eKYC Tier','A scale','E scale','AR vs Baseline'],
-    ['Conservative','Base (L0)','T1 $0.23','×0.60','×0.75','×0.55'],
-    ['Baseline','L1','T1 $'+rates.eT1,'×1.00','×1.00','client inputs'],
-    ['Optimistic','L2','T2 $'+rates.eT2,'×1.35','×1.20','×1.70'],
+    ['SCENARIO PRESETS (from the Scenario Presets tab)','',''],
+    ['Scenario','LoA shift','eKYC target','A (P) scale','E scale','Ramp shape','Y10 ceiling %','Use-case subset'],
+    ['Conservative',SCEN_PRESET.conservative.loaShift,SCEN_PRESET.conservative.ekycTarget,
+      '×'+SCEN_PRESET.conservative.pMult,'×'+SCEN_PRESET.conservative.eMult,
+      RAMP_SHAPES[SCEN_PRESET.conservative.rampShape].lbl,SCEN_PRESET.conservative.ceiling,
+      SCEN_PRESET.conservative.ucSubset.on?SCEN_PRESET.conservative.ucSubset.ids.length+' of '+UC.length+' use cases':'all enabled use cases'],
+    ['Baseline','—','—','client inputs','client inputs','client AR grid (+ per-UC overrides)','client AR grid',
+      SCEN_PRESET.baseline.ucSubset.on?SCEN_PRESET.baseline.ucSubset.ids.length+' of '+UC.length+' use cases':'all enabled use cases'],
+    ['Optimistic',SCEN_PRESET.optimistic.loaShift,SCEN_PRESET.optimistic.ekycTarget,
+      '×'+SCEN_PRESET.optimistic.pMult,'×'+SCEN_PRESET.optimistic.eMult,
+      RAMP_SHAPES[SCEN_PRESET.optimistic.rampShape].lbl,SCEN_PRESET.optimistic.ceiling,
+      SCEN_PRESET.optimistic.ucSubset.on?SCEN_PRESET.optimistic.ucSubset.ids.length+' of '+UC.length+' use cases':'all enabled use cases'],
     [''],
     ['SOM SHEET COLUMN MAPPING','',''],
     ['Col 38  Unit p(u)','← InputC_SOM col E/H/K (per scenario)','Copy to SOM!AL7:AL170'],
@@ -1518,7 +1881,7 @@ function exportXLSX(){
     const mkBlock=s=>[
       '',n4(sv[s].p),n5(sv[s].A),n4(sv[s].E),...sv[s].ar.map(v=>+v.toFixed(5))
     ];
-    return[u.s,u.id,u.n,en,...mkBlock('conservative'),...mkBlock('baseline'),...mkBlock('optimistic')];
+    return[u.s,u.id,getDesc(u),en,...mkBlock('conservative'),...mkBlock('baseline'),...mkBlock('optimistic')];
   });
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([
     ['OmniTrust Somalia — InputC_SOM — All 3 Scenarios · Paste into SOM sheet Cols 38, 44, 45, 46-55'],
@@ -1529,13 +1892,14 @@ function exportXLSX(){
   // ── Sheets 3–5: Output per scenario ─────────────────────────────────────
   SCENS.forEach(scen=>{
     const label=SCEN_LABELS[scen];
+    const scenPop=getScenarioParams(scen).pop; // preset may define its own population assumptions
     const rows=UC.map(u=>{
       const sv=getScenValues(u,rates);
-      const {revs}=projectScenUC(sv[scen],pop);
-      const vols=sv[scen].ar.map(arY=>pop*sv[scen].A*arY*sv[scen].E);
+      const {revs}=projectScenUC(sv[scen],scenPop);
+      const vols=sv[scen].ar.map(arY=>scenPop*sv[scen].A*arY*sv[scen].E);
       const totV=vols.reduce((a,b)=>a+b,0);
       const totR=revs.reduce((a,b)=>a+b,0);
-      return[u.s,u.id,u.n,isEnabled(u.id)?1:0,
+      return[u.s,u.id,getDesc(u),isEnabled(u.id)?1:0,
         n4(sv[scen].p),n5(sv[scen].A),n4(sv[scen].E),
         ...vols.map(v=>+v.toFixed(1)),...revs.map(v=>+v.toFixed(2)),
         +totV.toFixed(0),+totR.toFixed(2),+(totR*spv).toFixed(2)];
@@ -1552,9 +1916,10 @@ function exportXLSX(){
       +activeRows.reduce((s,r)=>s+r[27],0).toFixed(0),
       +activeRows.reduce((s,r)=>s+r[28],0).toFixed(2),
       +activeRows.reduce((s,r)=>s+r[29],0).toFixed(2)];
+    const subsetNote=SCEN_PRESET[scen]?.ucSubset?.on?` · curated subset: ${SCEN_PRESET[scen].ucSubset.ids.length} use cases (others shown as $0)`:'';
     XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([
       [`OmniTrust Somalia — ${label}`],
-      [`Pop=${pop.toLocaleString()} · SPV ${Math.round(spv*100)}% · ${UC.filter(u=>isEnabled(u.id)).length} UCs included`],
+      [`Pop=${scenPop.toLocaleString()} · SPV ${Math.round(spv*100)}% · ${UC.filter(u=>isEnabled(u.id)).length} UCs included${subsetNote}`],
       [''],hdr,...rows,[''],sumR
     ]),`Output_${scen.charAt(0).toUpperCase()+scen.slice(1)}`);
   });
@@ -1566,11 +1931,12 @@ function exportXLSX(){
   ];
   SCENS.forEach(scen=>{
     const label=SCEN_LABELS[scen];
+    const scenPop=getScenarioParams(scen).pop;
     const activeUCs=UC.filter(u=>isEnabled(u.id));
     const yrR=YEARS.map((_,t)=>
-      activeUCs.reduce((s,u)=>{ const sv=getScenValues(u,rates); return s+projectScenUC(sv[scen],pop).revs[t]; },0));
+      activeUCs.reduce((s,u)=>{ const sv=getScenValues(u,rates); return s+projectScenUC(sv[scen],scenPop).revs[t]; },0));
     const yrV=YEARS.map((_,t)=>
-      activeUCs.reduce((s,u)=>{ const sv=getScenValues(u,rates); const vols=sv[scen].ar.map(arY=>pop*sv[scen].A*arY*sv[scen].E); return s+vols[t]; },0));
+      activeUCs.reduce((s,u)=>{ const sv=getScenValues(u,rates); const vols=sv[scen].ar.map(arY=>scenPop*sv[scen].A*arY*sv[scen].E); return s+vols[t]; },0));
     ysRows.push(
       [label,'OT Revenue','USD',...yrR.map(v=>+v.toFixed(0)),+yrR.reduce((a,b)=>a+b,0).toFixed(0)],
       [label,`T5 ${Math.round(spv*100)}% Revenue`,'USD',...yrR.map(v=>+(v*spv).toFixed(0)),+(yrR.reduce((a,b)=>a+b,0)*spv).toFixed(0)],
@@ -1612,11 +1978,11 @@ function exportXLSX(){
 // ── Legacy CSV (single sheet, backwards compat) ────────────────────────────
 function exportCSV_legacy(){
   const params=getParams();const rates=getRates();
-  const proj=UC.map(u=>projectUC(u,params,rates));
+  const proj=UC.map(u=>projectUC(u,params,rates,'baseline')); // exports always reflect Baseline, regardless of dashboard scenario toggle
   let csv='Somalia Partner Data — OmniTrust DPI\n';
   csv+=`Date,${new Date().toISOString().slice(0,10)}\n\n`;
   csv+='UC Code,Use Case,Sector,Pattern,Enabled,P%,E/yr,A_frac,Unit_Price(p_u),';
-  csv+=yrs.map(y=>'V_'+y).join(',')+','+yrs.map(y=>'R_'+y).join(',')+',10yr_OT_Total,10yr_T5_Total\n';
+  csv+=YEARS.map(y=>'V_'+y).join(',')+','+YEARS.map(y=>'R_'+y).join(',')+',10yr_OT_Total,10yr_T5_Total\n';
   proj.sort((a,b)=>b.totRev-a.totRev).forEach(({uc,rows,totRev})=>{
     const en=isEnabled(uc.id)?1:0;
     const P_val=(getOv(OV.P,uc.id,sugP(uc))*100).toFixed(1);
@@ -1626,7 +1992,7 @@ function exportCSV_legacy(){
     const pr=OV.prices[uc.id]!==undefined?OV.prices[uc.id]:sug;
     const vols=rows.map(r=>r.events.toFixed(0));
     const revs=rows.map(r=>r.rev.toFixed(2));
-    csv+=`"${uc.id}","${uc.n}","${uc.s}","${PAT_LABEL[getPat(uc.svcs)]}",${en},${P_val},${E_val},${A_frac},${pr.toFixed(4)},${vols.join(',')},${revs.join(',')},${totRev.toFixed(2)},${(totRev*params.spv).toFixed(2)}\n`;
+    csv+=`"${uc.id}","${getDesc(uc).replace(/"/g,'""')}","${uc.s}","${PAT_LABEL[getPat(uc.svcs,uc.id)]}",${en},${P_val},${E_val},${A_frac},${pr.toFixed(4)},${vols.join(',')},${revs.join(',')},${totRev.toFixed(2)},${(totRev*params.spv).toFixed(2)}\n`;
   });
   const blob=new Blob([csv],{type:'text/csv'});
   const a=document.createElement('a');
@@ -1650,7 +2016,10 @@ function exportJSON(){
       enrt:+document.getElementById('p-enrt').value,
       enrs:+document.getElementById('p-enrs').value,
       spv:+document.getElementById('p-spv').value},
-    AR:OV.AR,prices:OV.prices,P:OV.P,E:OV.E,enabled:OV.enabled,svcs:OV.svcs};
+    AR:OV.AR,prices:OV.prices,P:OV.P,E:OV.E,A:OV.A,enabled:OV.enabled,svcs:OV.svcs,
+    pattern:OV.pattern,desc:OV.desc,rampShape:OV.rampShape,activeScenario,scenarioMode,
+    customUC:UC.filter(u=>u.custom),
+    scenPreset:SCEN_PRESET};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
@@ -1677,8 +2046,23 @@ function loadFromFile(evt){
       if(d.prices)OV.prices=d.prices;
       if(d.P)OV.P=d.P;
       if(d.E)OV.E=d.E;
+      if(d.A)OV.A=d.A;
       if(d.enabled)OV.enabled=d.enabled;
       if(d.svcs)OV.svcs=d.svcs;
+      if(d.pattern)OV.pattern=d.pattern;
+      if(d.desc)OV.desc=d.desc;
+      if(d.rampShape)OV.rampShape=d.rampShape;
+      if(d.activeScenario)activeScenario=d.activeScenario;
+      if(d.scenarioMode)scenarioMode=d.scenarioMode;
+      if(d.scenPreset){
+        Object.keys(SCEN_PRESET).forEach(k=>{ if(d.scenPreset[k]) Object.assign(SCEN_PRESET[k],d.scenPreset[k]); });
+      }
+      if(d.customUC){
+        // remove any custom UCs already in memory, then restore the saved ones
+        for(let i=UC.length-1;i>=0;i--){ if(UC[i].custom) UC.splice(i,1); }
+        d.customUC.forEach(u=>UC.push(Object.assign({},u,{custom:true})));
+        rebuildSecNavs();
+      }
       renderPriceTbl();recalc();
       unsaved=false;updateUnsavedDot();
       alert('✓ Data loaded from '+f.name);
@@ -1687,14 +2071,17 @@ function loadFromFile(evt){
   r.readAsText(f);
 }
 function resetForm(){
-  if(!confirm('Reset all overrides to suggested values?'))return;
-  OV={prices:{},P:{},E:{},AR:[...SOM_AR_DEF],enabled:{},svcs:{}};
-  buildARGrid();renderPriceTbl();recalc();
+  if(!confirm('Reset all overrides to suggested values? This also resets the Scenario Presets to their defaults (custom-added use cases are kept).'))return;
+  OV={prices:{},P:{},E:{},A:{},AR:[...SOM_AR_DEF],enabled:{},svcs:{},pattern:{},desc:{},rampShape:{}};
+  activeScenario='baseline';
+  scenarioMode='custom';
+  SCEN_PRESET={conservative:freshPreset('conservative'),baseline:freshPreset('baseline'),optimistic:freshPreset('optimistic')};
+  buildARGrid();renderPriceTbl();recalc();renderScenPresetsTab();
   unsaved=false;updateUnsavedDot();
 }
 function exportCSV(){
   const params=getParams();const rates=getRates();
-  const proj=UC.map(u=>projectUC(u,params,rates));  // all UCs projected
+  const proj=UC.map(u=>projectUC(u,params,rates,'baseline'));  // exports always reflect Baseline, regardless of dashboard scenario toggle
   let csv='Somalia Partner Data — OmniTrust DPI\n';
   csv+=`Date,${new Date().toISOString().slice(0,10)}\nTotal Pop,${params.pop}\nSPV,${params.spv*100}%\n\n`;
   csv+='UC Code,Use Case,Sector,Pattern,P%,E/yr,AR Y1%,Unit Price,';
@@ -1702,11 +2089,11 @@ function exportCSV(){
   proj.sort((a,b)=>b.totRev-a.totRev).forEach(({uc,rows,totRev})=>{
     const P_val=(getOv(OV.P,uc.id,sugP(uc))*100).toFixed(1);
     const E_val=getOv(OV.E,uc.id,sugE(uc)).toFixed(2);
-    const ar0=(OV.AR[0]).toFixed(1);
+    const ar0=getOv(OV.A,uc.id,sugA(uc)).toFixed(1);
     const sug=sugPrice(uc.svcs,rates);
     const pr=OV.prices[uc.id]!==undefined?OV.prices[uc.id]:sug;
     const revs=rows.map(r=>r.rev.toFixed(2));
-    csv+=`"${uc.id}","${uc.n}","${uc.s}","${PAT_LABEL[getPat(uc.svcs)]}",${P_val},${E_val},${ar0},${pr.toFixed(3)},${revs.join(',')},${totRev.toFixed(2)}\n`;
+    csv+=`"${uc.id}","${getDesc(uc).replace(/"/g,'""')}","${uc.s}","${PAT_LABEL[getPat(uc.svcs,uc.id)]}",${P_val},${E_val},${ar0},${pr.toFixed(3)},${revs.join(',')},${totRev.toFixed(2)}\n`;
   });
   const blob=new Blob([csv],{type:'text/csv'});
   const a=document.createElement('a');
@@ -1716,45 +2103,108 @@ function exportCSV(){
 }
 
 
-// ── Scenario derivation (auto from client baseline) ──────────────────────────
-// Conservative: Base LoA, P_val×0.60, E×0.75, AR×0.55
-// Baseline:     client inputs (L1 LoA, partner P/E/AR)
-// Optimistic:   L2+T2 LoA, P_val×1.35, E×1.20, AR×1.70
-const CONS_AR_F=[0.00623,0.01291,0.02545,0.04597,0.07301,0.10006,0.12057,0.13311,0.13979,0.14309];
-const OPT_AR_F =[0.01926,0.03992,0.07868,0.14209,0.22568,0.30926,0.37267,0.41143,0.43209,0.44229];
+// ── Scenario Presets (Conservative / Baseline / Optimistic) ──────────────────
+// Fully editable on the "Scenario Presets" tab. Defaults below are just starting points.
+const SCEN_DEFS={
+  conservative:{cls:'cons',lbl:'Conservative'},
+  baseline:    {cls:'base',lbl:'Baseline'},
+  optimistic:  {cls:'opt', lbl:'Optimistic'},
+};
+// A curated "core" subset for the Conservative preset — a handful of the highest-confidence
+// use cases across a few anchor sectors, per the brief (finance, telco, social protection, etc.).
+// Editable per-scenario on the Scenario Presets tab; this is just the shipped default.
+const DEFAULT_CONSERVATIVE_UC_SUBSET=[
+  'UC-01-001','UC-04-001','UC-04-005','UC-05-001','UC-05-003','UC-06-001','UC-06-002','UC-07-001',
+];
+function freshPreset(kind){
+  if(kind==='conservative') return{
+    popOv:{on:false,pop:17500000,age:58,enr1:12,enrt:30,enrs:10},
+    loaShift:-1, ekycTarget:'keep',
+    pMult:0.60, eMult:0.75,
+    rampShape:'slow', ceiling:14.3,
+    ucSubset:{on:true, ids:[...DEFAULT_CONSERVATIVE_UC_SUBSET]},
+  };
+  if(kind==='optimistic') return{
+    popOv:{on:true,pop:17500000,age:58,enr1:22,enrt:65,enrs:6},
+    loaShift:+1, ekycTarget:'T2',
+    pMult:1.35, eMult:1.20,
+    rampShape:'fast', ceiling:44.2,
+    ucSubset:{on:false, ids:[]},
+  };
+  // baseline: intentionally mirrors live Price/Volume tab inputs — no independent pop/LoA/ramp.
+  return{
+    popOv:{on:false,pop:17500000,age:58,enr1:18,enrt:55,enrs:8},
+    loaShift:0, ekycTarget:'keep',
+    pMult:1.00, eMult:1.00,
+    rampShape:'standard', ceiling:null, // null ceiling = mirror the live AR grid entirely
+    ucSubset:{on:false, ids:[]},
+  };
+}
+let SCEN_PRESET={
+  conservative:freshPreset('conservative'),
+  baseline:freshPreset('baseline'),
+  optimistic:freshPreset('optimistic'),
+};
 
-function scenSugPrice(svcs, loa, ekycRate, rates){
-  // Build rate lookup from live rates object
-  const r={
-    Base: {auth:rates.aBase, ci:rates.cBase, cv:rates.vBase},
-    L1:   {auth:rates.aL1,   ci:rates.cL1,   cv:rates.vL1},
-    L2:   {auth:rates.aL2,   ci:rates.cL2,   cv:rates.vL2},
-    L3:   {auth:rates.aL3,   ci:rates.cL3,   cv:rates.vL3},
-  }[loa] || {auth:rates.aBase, ci:rates.cBase, cv:rates.vBase};
-  let p=0;
-  if(svcs.ekyc) p+=ekycRate;
-  if(svcs.ci)   p+=r.ci;
-  if(svcs.cv)   p+=r.cv;
-  if(svcs.auth) p+=r.auth;
-  if(svcs.pay)  p+=rates.pay||0.10;
-  return+p.toFixed(4);
+// Step CI/CV/Auth tiers by `shift` levels (reuses deriveSvcs' clamped stepTier ladder) and,
+// if requested, force the eKYC tier to a specific value (only for services that have one).
+function applyLoaShift(svcs, shift, ekycTarget){
+  const out = shift ? deriveSvcs(svcs, shift) : Object.assign({}, svcs);
+  if(ekycTarget && ekycTarget!=='keep' && out.ekyc){ out.ekyc = ekycTarget; }
+  return out;
+}
+// True unless the given scenario has a curated use-case subset enabled and this UC isn't in it.
+function ucInScenarioSubset(ucId, scenario){
+  const preset=SCEN_PRESET[scenario];
+  if(!preset || !preset.ucSubset || !preset.ucSubset.on) return true;
+  return preset.ucSubset.ids.includes(ucId);
+}
+// Single source of truth for scenario math — used by the live dashboard (via scenarioAdjust),
+// the scenario-comparison cards/dropdown, and the 3-scenario XLSX export sheets (via getScenValues).
+function scenarioCore(uc, rates, scenario){
+  const effSvcs=getUCSvcs(uc);
+  const baseA=getOv(OV.P,uc.id,sugP(uc));
+  const baseE=getOv(OV.E,uc.id,sugE(uc));
+  const inSub=ucInScenarioSubset(uc.id,scenario);
+  if(scenario==='baseline'){
+    const sug=sugPrice(effSvcs,rates);
+    const price=OV.prices[uc.id]!==undefined?OV.prices[uc.id]:sug;
+    return{P:inSub?baseA:0, E:baseE, price, ar:getUCRamp(uc)};
+  }
+  const preset=SCEN_PRESET[scenario]||freshPreset(scenario);
+  const shifted=applyLoaShift(effSvcs,preset.loaShift,preset.ekycTarget);
+  const price=+sugPrice(shifted,rates).toFixed(4);
+  const ar=preset.ceiling!=null ? deriveRampCurve(preset.rampShape,preset.ceiling) : getAR();
+  return{
+    P: inSub ? baseA*preset.pMult : 0,
+    E: baseE*preset.eMult,
+    price, ar,
+  };
+}
+// Population assumptions for a scenario: live Volume-tab inputs unless the preset overrides them.
+function getScenarioParams(scenario){
+  const live=getParams();
+  const preset=SCEN_PRESET[scenario];
+  if(!preset || !preset.popOv || !preset.popOv.on) return live;
+  return{
+    pop:preset.popOv.pop, age:preset.popOv.age/100,
+    enr1:preset.popOv.enr1/100, enrt:preset.popOv.enrt/100,
+    enrs:preset.popOv.enrs, spv:live.spv,
+  };
+}
+// Which scenario is actually driving the dashboard right now (Custom mode always = 'baseline').
+function effectiveScenario(){ return scenarioMode==='preset' ? activeScenario : 'baseline'; }
+function getEffectiveParams(){
+  const scen=effectiveScenario();
+  return scen==='baseline' ? getParams() : getScenarioParams(scen);
 }
 
 function getScenValues(uc, rates){
-  // Baseline = client's actual inputs (with any service mix overrides applied)
-  const effSvcs = getUCSvcs(uc);
-  const baseP   = OV.prices[uc.id]!==undefined ? OV.prices[uc.id] : sugPrice(effSvcs,rates);
-  const baseA   = getOv(OV.P, uc.id, sugP(uc));   // P_val: applicability of enrolled pop
-  const baseE   = getOv(OV.E, uc.id, sugE(uc));   // E: events/user/yr
-  const baseAR  = OV.AR.map(v=>v/100);             // AR as fractions
-  const otr     = +document.getElementById('sr-eT2')?.value||1.76;
-  return{
-    // Conservative: step each service tier DOWN one level from client's baseline
-    // Optimistic: step each service tier UP one level from client's baseline
-    conservative:{ p:+sugPrice(deriveSvcs(effSvcs,-1),rates).toFixed(4), A:+(baseA*0.60).toFixed(5), E:+(baseE*0.75).toFixed(4), ar:CONS_AR_F },
-    baseline:    { p:+baseP.toFixed(4),                                   A:+(baseA*1.00).toFixed(5), E:+(baseE*1.00).toFixed(4), ar:baseAR    },
-    optimistic:  { p:+sugPrice(deriveSvcs(effSvcs,+1),rates).toFixed(4), A:+(baseA*1.35).toFixed(5), E:+(baseE*1.20).toFixed(4), ar:OPT_AR_F  },
+  const mk=scenario=>{
+    const c=scenarioCore(uc,rates,scenario);
+    return{ p:+c.price.toFixed(4), A:+c.P.toFixed(5), E:+c.E.toFixed(4), ar:c.ar };
   };
+  return{ conservative:mk('conservative'), baseline:mk('baseline'), optimistic:mk('optimistic') };
 }
 
 function projectScenUC(sv, pop){
@@ -1763,27 +2213,61 @@ function projectScenUC(sv, pop){
   return{ revs, tot10:revs.reduce((a,b)=>a+b,0) };
 }
 
+// Sets the Volume tab's Custom vs Scenario-Presets mode. Custom (default) ignores scenario presets
+// entirely — the dashboard always shows your live Price/Volume tab inputs. Only in 'preset' mode
+// does the Active Scenario dropdown (and the presets you define on the Scenario Presets tab) drive
+// the dashboard. Exports (CSV/XLSX single-scenario) always report Baseline regardless of this.
+function setScenarioMode(m){
+  if(m!=='custom' && m!=='preset') return;
+  scenarioMode=m;
+  markUnsaved();
+  recalc();
+}
+function setScenario(k){
+  if(!SCEN_DEFS[k])return;
+  activeScenario=k;
+  markUnsaved();
+  recalc();
+}
 function renderScenStrip(){
   const div=document.getElementById('scen-strip'); if(!div)return;
-  const params=getParams(), rates=getRates();
-  const pop=params.pop, spv=params.spv;
-  const SCENS=[
-    {k:'conservative',cls:'cons',lbl:'Conservative',desc:'Base LoA · P×0.60 · E×0.75 · AR×0.55'},
-    {k:'baseline',    cls:'base',lbl:'Baseline',    desc:'L1 LoA · client inputs · status quo'},
-    {k:'optimistic',  cls:'opt', lbl:'Optimistic',  desc:'L2 LoA · T2 eKYC · P×1.35 · E×1.20 · AR×1.70'},
-  ];
+  const rates=getRates();
+  // Cheap to compute all three totals just for the picker/preview — each uses its own population
+  // assumptions (getScenarioParams) and its own curated use-case subset, independent of live mode.
   const totals={conservative:0,baseline:0,optimistic:0};
-  UC.filter(u=>isEnabled(u.id)).forEach(u=>{
-    const sv=getScenValues(u,rates);
-    SCENS.forEach(s=>{ totals[s.k]+=projectScenUC(sv[s.k],pop).tot10; });
+  Object.keys(SCEN_DEFS).forEach(k=>{
+    const p=getScenarioParams(k);
+    UC.filter(u=>isEnabled(u.id)&&ucInScenarioSubset(u.id,k)).forEach(u=>{
+      const sv=getScenValues(u,rates);
+      totals[k]+=projectScenUC(sv[k],p.pop).tot10;
+    });
   });
-  div.innerHTML=SCENS.map(s=>`
+  const mode=scenarioMode;
+  div.innerHTML=`
+    <div class="scen-mode-row">
+      <label>Volume tab mode</label>
+      <div class="mode-toggle">
+        <button class="mode-btn ${mode==='custom'?'act':''}" onclick="setScenarioMode('custom')">Custom (your inputs)</button>
+        <button class="mode-btn ${mode==='preset'?'act':''}" onclick="setScenarioMode('preset')">Scenario Presets</button>
+      </div>
+      <span class="mode-note">${mode==='custom'?'Showing your Price &amp; Volume tab inputs exactly as entered.':'Dashboard below reflects the selected preset — edit presets on the Scenario Presets tab.'}</span>
+    </div>
+    <div class="scen-picker" style="${mode!=='preset'?'opacity:.45':''}">
+      <label for="scen-select">Active scenario</label>
+      <select id="scen-select" onchange="setScenario(this.value)" ${mode!=='preset'?'disabled':''}>
+        ${Object.entries(SCEN_DEFS).map(([k,v])=>
+          `<option value="${k}" ${k===activeScenario?'selected':''}>${v.lbl} — ${fM(totals[k])} 10yr</option>`
+        ).join('')}
+      </select>
+      <span class="scen-hint">Volume table, KPIs and per-UC figures below are calculated for the selected scenario. Exports always report Baseline.</span>
+    </div>
+    ${mode==='preset'?(()=>{const s=SCEN_DEFS[activeScenario];return`
     <div class="sc-card ${s.cls}">
       <div class="sc-lbl">${s.lbl}</div>
-      <div class="sc-desc">${s.desc}</div>
-      <div class="sc-rev">${fM(totals[s.k])}</div>
-      <div class="sc-sub">10yr OmniTrust Platform Revenue</div>
-    </div>`).join('');
+      <div class="sc-desc">Defined on the Scenario Presets tab</div>
+      <div class="sc-rev">${fM(totals[activeScenario])}</div>
+      <div class="sc-sub">10yr OmniTrust Platform Revenue (enabled use cases)</div>
+    </div>`;})():''}`;
 }
 
 
@@ -2004,6 +2488,185 @@ function initPlatformTab(){
   renderInstTable();
   renderPlatSummary();
   renderPlatKPIs();
+}
+
+// ── Scenario Presets tab ──────────────────────────────────────────────────────
+const SP_DESC={
+  conservative:'Fewer, higher-confidence use cases · lower Level of Assurance · slower adoption. Use this to show a defensible downside case.',
+  baseline:    'Mirrors your Price &amp; Volume tab inputs exactly — no independent assumptions. This is the "as entered" case.',
+  optimistic:  'Full use-case coverage · higher Level of Assurance · faster adoption. Use this to show the upside case.',
+};
+function presetScenTotal(key){
+  const rates=getRates();
+  const params=getScenarioParams(key);
+  let tot=0;
+  UC.filter(u=>isEnabled(u.id)&&ucInScenarioSubset(u.id,key)).forEach(u=>{
+    const sv=getScenValues(u,rates);
+    tot+=projectScenUC(sv[key],params.pop).tot10;
+  });
+  return tot;
+}
+function renderScenPresetsTab(){
+  const root=document.getElementById('scen-presets-root');if(!root)return;
+  root.innerHTML=Object.keys(SCEN_DEFS).map(key=>spCardHtml(key)).join('');
+}
+function spCardHtml(key){
+  const def=SCEN_DEFS[key];
+  const preset=SCEN_PRESET[key];
+  const isBaseline=key==='baseline';
+  const total=presetScenTotal(key);
+  return `<div class="sp-card ${def.cls}">
+    <div class="sp-hdr"><h3>${def.lbl}</h3><span class="sp-summary">${fM(total)} · 10yr</span></div>
+    <div class="sp-desc">${SP_DESC[key]}${!isBaseline?` <button class="sel-btn" style="padding:2px 8px;font-size:9.5px" onclick="resetPreset('${key}')">↺ Reset to default</button>`:''}</div>
+    ${isBaseline?'':spPopSectionHtml(key,preset)}
+    ${isBaseline?'':spLoaSectionHtml(key,preset)}
+    ${isBaseline?'':spMultSectionHtml(key,preset)}
+    ${isBaseline?spArNoteHtml():spArSectionHtml(key,preset)}
+    ${spUcSubsetSectionHtml(key,preset)}
+  </div>`;
+}
+function spArNoteHtml(){
+  return `<div class="sp-section"><div class="sp-section-title">Adoption ramp</div>
+    <div class="mode-note">Baseline uses the live Adoption Ramp grid (and any per-use-case ramp shape/Year-1 overrides) on the Volume &amp; Projection tab.</div></div>`;
+}
+function spPopSectionHtml(key,preset){
+  const p=preset.popOv;
+  return `<div class="sp-section">
+    <div class="sp-section-title">
+      <label><input type="checkbox" ${p.on?'checked':''} onchange="onPresetPopToggle('${key}',this.checked)">
+      Override population assumptions for this scenario</label>
+    </div>
+    <div class="param-grid" style="${p.on?'':'opacity:.4;pointer-events:none'}">
+      <div class="param-item"><label>Total Population</label>
+        <input type="number" value="${p.pop}" step="100000" onchange="onPresetPopChange('${key}','pop',this.value)"></div>
+      <div class="param-item"><label>Age-eligible (15+) %</label>
+        <input type="number" value="${p.age}" step="1" min="10" max="95" onchange="onPresetPopChange('${key}','age',this.value)"></div>
+      <div class="param-item"><label>Yr 1 Enrollment %</label>
+        <input type="number" value="${p.enr1}" step="1" min="1" max="100" onchange="onPresetPopChange('${key}','enr1',this.value)"></div>
+      <div class="param-item"><label>Target Enrollment %</label>
+        <input type="number" value="${p.enrt}" step="1" min="1" max="100" onchange="onPresetPopChange('${key}','enrt',this.value)"></div>
+      <div class="param-item"><label>Enrollment Ramp (yrs)</label>
+        <input type="number" value="${p.enrs}" step="1" min="1" max="10" onchange="onPresetPopChange('${key}','enrs',this.value)"></div>
+    </div>
+  </div>`;
+}
+const EKYC_TARGET_OPTS=[['keep','Keep original'],['T1','Force T1'],['T2','Force T2']];
+function spLoaSectionHtml(key,preset){
+  return `<div class="sp-section">
+    <div class="sp-section-title">Level of Assurance (LoA)</div>
+    <div class="sp-loa-row">
+      <div class="param-item"><label>Service tier shift</label>
+        <input type="number" value="${preset.loaShift}" step="1" min="-2" max="2"
+          title="Steps CI/CV/Auth tiers up(+)/down(-) from your baseline mix, clamped to Base..L3"
+          onchange="onPresetLoaShift('${key}',this.value)"></div>
+      <div class="param-item"><label>eKYC tier target</label>
+        <select onchange="onPresetEkycTarget('${key}',this.value)">
+          ${EKYC_TARGET_OPTS.map(([v,l])=>`<option value="${v}" ${v===preset.ekycTarget?'selected':''}>${l}</option>`).join('')}
+        </select></div>
+    </div>
+  </div>`;
+}
+function spMultSectionHtml(key,preset){
+  return `<div class="sp-section">
+    <div class="sp-section-title">Applicability &amp; frequency multipliers</div>
+    <div class="sp-loa-row">
+      <div class="param-item"><label>Applicability (P) ×</label>
+        <input type="number" value="${preset.pMult}" step="0.05" min="0" onchange="onPresetMult('${key}','pMult',this.value)"></div>
+      <div class="param-item"><label>Frequency (E) ×</label>
+        <input type="number" value="${preset.eMult}" step="0.05" min="0" onchange="onPresetMult('${key}','eMult',this.value)"></div>
+    </div>
+  </div>`;
+}
+function spArSectionHtml(key,preset){
+  const curve=deriveRampCurve(preset.rampShape,preset.ceiling).map(v=>v*100);
+  return `<div class="sp-section">
+    <div class="sp-section-title">Adoption ramp</div>
+    <div class="sp-loa-row">
+      <div class="param-item"><label>Ramp shape</label>
+        <select onchange="onPresetRampShape('${key}',this.value)">
+          ${Object.entries(RAMP_SHAPES).map(([k,v])=>`<option value="${k}" ${k===preset.rampShape?'selected':''}>${v.lbl}</option>`).join('')}
+        </select></div>
+      <div class="param-item"><label>Long-run ceiling %</label>
+        <input type="number" value="${preset.ceiling}" step="0.5" min="0" max="100"
+          title="Long-run adoption ceiling this scenario's use cases approach — slower shapes reach only part of the way there by 2036, by design"
+          onchange="onPresetCeiling('${key}',this.value)"></div>
+    </div>
+    <div style="margin-top:8px;font-size:9.5px;color:var(--mid)">
+      Year 1 is derived automatically from the shape (${(RAMP_SHAPES[preset.rampShape].y1Frac*100).toFixed(1)}% of the ceiling) — both Year 1 and every later year update together whenever you change the shape or ceiling.
+      Slower shapes approach this ceiling asymptotically and may still be well short of it by 2036 — that's the intended "long first tail."
+    </div>
+    <div class="ar-grid" style="margin-top:8px;opacity:.75;pointer-events:none">
+      ${YEARS.map((yr,t)=>`<div class="ar-cell"><label>${yr}</label>
+        <input type="number" value="${curve[t].toFixed(1)}" readonly tabindex="-1"></div>`).join('')}
+    </div>
+  </div>`;
+}
+function spUcSubsetSectionHtml(key,preset){
+  const sub=preset.ucSubset;
+  const n=sub.ids.length;
+  let listHtml='';
+  if(sub.on){
+    let lastSec='';
+    getSectors().forEach(sec=>{
+      const ucs=UC.filter(u=>u.s===sec);
+      if(!ucs.length)return;
+      listHtml+=`<div class="sp-uc-sec-lbl">${sec}</div>`;
+      ucs.forEach(u=>{
+        listHtml+=`<div class="sp-uc-row"><label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+          <input type="checkbox" ${sub.ids.includes(u.id)?'checked':''} onchange="onPresetUcToggle('${key}','${u.id}',this.checked)">
+          <span>${u.id} — ${escAttr(getDesc(u))}</span></label></div>`;
+      });
+    });
+  }
+  return `<div class="sp-section">
+    <div class="sp-section-title">
+      <label><input type="checkbox" ${sub.on?'checked':''} onchange="onPresetSubsetToggle('${key}',this.checked)">
+      Restrict to a curated subset of use cases</label>
+      ${sub.on?`<span style="font-weight:400;color:var(--mid);text-transform:none;font-size:10.5px">${n} of ${UC.length} selected</span>`:''}
+    </div>
+    ${sub.on?`<div class="sp-uc-list">${listHtml}</div>`:''}
+  </div>`;
+}
+function onPresetPopToggle(key,checked){ SCEN_PRESET[key].popOv.on=checked; markUnsaved(); renderScenPresetsTab(); recalc(); }
+function onPresetPopChange(key,field,v){
+  const n=+v; if(isNaN(n))return;
+  SCEN_PRESET[key].popOv[field]=n; markUnsaved(); recalc(); renderScenPresetsTab();
+}
+function onPresetLoaShift(key,v){
+  let n=Math.round(+v); if(isNaN(n))n=0; n=Math.max(-2,Math.min(2,n));
+  SCEN_PRESET[key].loaShift=n; markUnsaved(); recalc(); renderScenPresetsTab();
+}
+function onPresetEkycTarget(key,v){ SCEN_PRESET[key].ekycTarget=v; markUnsaved(); recalc(); renderScenPresetsTab(); }
+function onPresetMult(key,field,v){
+  const n=+v; if(isNaN(n)||n<0)return;
+  SCEN_PRESET[key][field]=n; markUnsaved(); recalc(); renderScenPresetsTab();
+}
+function onPresetRampShape(key,v){
+  if(!RAMP_SHAPES[v])return;
+  SCEN_PRESET[key].rampShape=v; markUnsaved(); recalc(); renderScenPresetsTab();
+}
+function onPresetCeiling(key,v){
+  let n=+v; if(isNaN(n)||n<0)return;
+  SCEN_PRESET[key].ceiling=n; markUnsaved(); recalc(); renderScenPresetsTab();
+}
+function onPresetSubsetToggle(key,checked){
+  SCEN_PRESET[key].ucSubset.on=checked;
+  if(checked && !SCEN_PRESET[key].ucSubset.ids.length && key==='conservative'){
+    SCEN_PRESET[key].ucSubset.ids=[...DEFAULT_CONSERVATIVE_UC_SUBSET];
+  }
+  markUnsaved(); recalc(); renderScenPresetsTab();
+}
+function onPresetUcToggle(key,ucId,checked){
+  const ids=SCEN_PRESET[key].ucSubset.ids;
+  const idx=ids.indexOf(ucId);
+  if(checked && idx<0) ids.push(ucId);
+  if(!checked && idx>=0) ids.splice(idx,1);
+  markUnsaved(); recalc(); renderScenPresetsTab();
+}
+function resetPreset(key){
+  if(!confirm(`Reset the ${SCEN_DEFS[key].lbl} preset to its default assumptions?`))return;
+  SCEN_PRESET[key]=freshPreset(key);
+  markUnsaved(); recalc(); renderScenPresetsTab();
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
